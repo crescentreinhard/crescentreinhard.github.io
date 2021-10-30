@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>欢迎</title>
+    <url>/2021/10/28/welcome/</url>
+    <content><![CDATA[<h1>欢迎！</h1>
+<h2 id="Hello-world"><a class="header-anchor" href="#Hello-world">¶</a>Hello world!</h2>
+<p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左上角的按钮。</p>
+<p>也可以通过左上角的按钮进行站内文章的搜索</p>
+<p>祝你玩的开心!</p>
+]]></content>
+      <categories>
+        <category>test</category>
+      </categories>
+      <tags>
+        <tag>testtag</tag>
+        <tag>welcome</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>代码的测试</title>
     <url>/2021/10/30/%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95/</url>
     <content><![CDATA[<h3 id="C"><a class="header-anchor" href="#C">¶</a>C</h3>
@@ -27,29 +44,17 @@
 $$</p>
 <h2 id="integral"><a class="header-anchor" href="#integral">¶</a>integral</h2>
 <p>$\int_0^\pi \sin{x}dx=2$</p>
+<h2 id="Fourier-Transform"><a class="header-anchor" href="#Fourier-Transform">¶</a>Fourier  Transform</h2>
+<p>$$<br>
+F(\omega)=\int_{-\infty}<sup>{+\infty}f(t)e</sup>{-j\omega t}dt\<br>
+f(t)=\frac{1}{2\pi}\int_{-\infty}<sup>{+\infty}F(\omega)e</sup>{j\omega t}d\omega<br>
+$$</p>
 ]]></content>
       <categories>
         <category>test</category>
       </categories>
       <tags>
         <tag>数学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>欢迎</title>
-    <url>/2021/10/28/welcome/</url>
-    <content><![CDATA[<h1>欢迎！</h1>
-<h2 id="Hello-world"><a class="header-anchor" href="#Hello-world">¶</a>Hello world!</h2>
-<p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左上角的按钮。</p>
-<p>也可以通过左上角的按钮进行站内文章的搜索</p>
-<p>祝你玩的开心!</p>
-]]></content>
-      <categories>
-        <category>test</category>
-      </categories>
-      <tags>
-        <tag>testtag</tag>
-        <tag>welcome</tag>
       </tags>
   </entry>
 </search>
