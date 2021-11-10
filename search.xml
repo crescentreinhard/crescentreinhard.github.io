@@ -3,9 +3,7 @@
   <entry>
     <title>欢迎</title>
     <url>/2021/10/28/welcome/</url>
-    <content><![CDATA[<h1>欢迎！</h1>
-<h2 id="Hello-world"><a class="header-anchor" href="#Hello-world">¶</a>Hello world!</h2>
-<p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左下角的按钮。</p>
+    <content><![CDATA[<h1 id="欢迎！"><a href="#欢迎！" class="headerlink" title="欢迎！"></a>欢迎！</h1><h2 id="Hello-world"><a href="#Hello-world" class="headerlink" title="Hello world!"></a>Hello world!</h2><p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左下角的按钮。</p>
 <p>也可以通过左下角的按钮进行站内文章的搜索</p>
 <p>祝你玩的开心!</p>
 ]]></content>
@@ -19,12 +17,9 @@
   </entry>
   <entry>
     <title>计算机网络 第一次实验</title>
-    <url>/2021/11/03/%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%AE%A1%E7%BD%91%E5%AE%9E%E9%AA%8C/</url>
-    <content><![CDATA[<h1>第一次实验 IP组网</h1>
-<h2 id="第一个小实验-linux下常用网络指令"><a class="header-anchor" href="#第一个小实验-linux下常用网络指令">¶</a>第一个小实验 linux下常用网络指令</h2>
-<ol>
-<li>
-<p>ip address命令的结果</p>
+    <url>/2021/11/03/first_exp_CN/</url>
+    <content><![CDATA[<h1 id="第一次实验-IP组网"><a href="#第一次实验-IP组网" class="headerlink" title="第一次实验 IP组网"></a>第一次实验 IP组网</h1><h2 id="第一个小实验-linux下常用网络指令"><a href="#第一个小实验-linux下常用网络指令" class="headerlink" title="第一个小实验 linux下常用网络指令"></a>第一个小实验 linux下常用网络指令</h2><ol>
+<li><p>ip address命令的结果</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</span><br><span class="line">    link/ether 00:0c:29:ac:2e:54 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.226.129/24 brd 192.168.226.255 scope global dynamic noprefixroute ens33</span><br><span class="line">       valid_lft 1417sec preferred_lft 1417sec</span><br><span class="line">    inet6 fe80::ba7:70e3:22ed:d2cf/64 scope link noprefixroute </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
 <p>图中的信息告诉我们，该虚拟机有两个接口，分别是环回(lo)和网络。环回接口是计算机内部使用的一个虚拟接口，它的数据包始终不会离开主机，经常用于测试。网络接口中，ens33是网卡的名称。实际上，在接口名称后面&lt;&gt;包裹的文字里已经注明了接口的作用和状态。环回、广播和多播很容易看出，而UP代表着“网络接口已启用”，LOWER_UP则代表着“网络电缆已插入，设备已连接至网络”。</p>
 <p>其后的参数中，mtu表示最大传输单位，qdisc表示数据包排队方式，state是网络接口状态，group是接口组设置，qlen代表了传输队列长度。</p>
@@ -32,8 +27,7 @@
 <p>接下来inet和inet6部分。inet代表了ipv4地址，而inet6代表ipv6地址。由此我们可以看出，本机的ipv4地址为：192.168.226.129，ipv6地址为：fe80::ba7:70e3:22ed:d2cf。scope global/link分别代表全局/仅本设备有效。noprefixroute则表示无前缀路由。valid_lft 与preferred_lft分别代表地址的有效使用期限和首选生存期。</p>
 <p>对于ip地址的”/“后的数字，代表了其子网掩码用二进制表示时为“1”的位数（由高到低），如192.168.226.129/24就代表了子网掩码为255.255.255.0。</p>
 </li>
-<li>
-<p>在windows cmd中输入ipconfig得到VMnet8的网络地址:192.168.226.1<img src="%5Cimages%5Cblogimg%5Cipconfig.jpg" alt="">同时在虚拟机中先执行<code>ip neigh flush all</code>命令后<code>ip neigh</code>的执行结果如下:</p>
+<li><p>在windows cmd中输入ipconfig得到VMnet8的网络地址:192.168.226.1<img src="/.com//ipconfig.jpg" alt>同时在虚拟机中先执行<code>ip neigh flush all</code>命令后<code>ip neigh</code>的执行结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">192.168.226.2 dev ens33 lladdr 00:50:56:ec:af:bf REACHABLE</span><br></pre></td></tr></table></figure>
 <p><code>ip neigh</code>用于显示arp缓存表单，用于将ip地址转换为MAC地址。我们看到有一条表项，这里的REACHABLE代表该表项目前仍有效，与此对应的还有STALE（表项过期）等。</p>
 <p>下面对192.168.226.1 ping 4次以后，得到的输出结果如下:</p>
@@ -43,30 +37,25 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">192.168.226.2 dev ens33 lladdr 00:50:56:ec:af:bf REACHABLE</span><br><span class="line">192.168.226.1 dev ens33 lladdr 00:50:56:c0:00:08 REACHABLE</span><br></pre></td></tr></table></figure>
 <p>可以看到输出结果增加了我们ping的ip地址，由此我们得到了对方机器的MAC地址:00:50:56:c0:00:08。</p>
 </li>
-<li>
-<p>用<code>ip route</code>命令查看本机的IPV4路由表如下：</p>
+<li><p>用<code>ip route</code>命令查看本机的IPV4路由表如下：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">default via 192.168.226.2 dev ens33 proto dhcp metric 100 </span><br><span class="line">169.254.0.0/16 dev ens33 scope link metric 1000 </span><br><span class="line">192.168.226.0/24 dev ens33 proto kernel scope link src 192.168.226.129 metric 100 </span><br></pre></td></tr></table></figure>
 <p>路由表中有三条，第一条很明显表明了默认网关是192.168.226.2，并采用DHCP协议动态分配IP。metric指出了该路由的跃点，即由源发往目的所经过的路由器数。</p>
 <p>第三条是我们自己所在的网络，这里我们可以看出<strong>子网掩码为255.255.255.0</strong>，与前面<code>ip address</code>命令所得一致。这里的<code>src</code>代表源IP地址，即通过这条路由发包时外界所看到的ip地址，这也与前面<code>ip address</code>命令中得到的主机ipv4地址一致。</p>
 <p>对于第二条，CSDN上的描述是，当DHCP协议失败时，主机将自动在169.254.x.x中选择一个地址分配，使得连接能继续下去。所以我个人认为，它应该是一条备用路由。</p>
 </li>
-<li>
-<p><code>sysctl net.ipv4.ip_forward</code>命令输出结果如下:</p>
+<li><p><code>sysctl net.ipv4.ip_forward</code>命令输出结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">net.ipv4.ip_forward = 0</span><br></pre></td></tr></table></figure>
 <p>对此的解释在<a href="#forward">思考题1</a>中。</p>
 </li>
-<li>
-<p><code>sudo traceroute --icmp 202.38.64.1</code>命令输出结果如下:</p>
+<li><p><code>sudo traceroute --icmp 202.38.64.1</code>命令输出结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">traceroute to 202.38.64.1 (202.38.64.1), 30 hops max, 60 byte packets</span><br><span class="line"> 1  _gateway (192.168.226.2)  0.719 ms  0.672 ms  0.654 ms</span><br><span class="line"> 2  192.168.133.254 (192.168.133.254)  3.684 ms  3.791 ms  4.200 ms</span><br><span class="line"> 3  172.16.0.1 (172.16.0.1)  1.498 ms  1.696 ms  1.676 ms</span><br><span class="line"> 4  202.38.88.94 (202.38.88.94)  1.074 ms  1.016 ms  1.294 ms</span><br><span class="line"> 5  202.38.96.60 (202.38.96.60)  1.147 ms  1.211 ms  1.357 ms</span><br><span class="line"> 6  ns.ustc.edu.cn (202.38.64.1)  0.645 ms  0.751 ms  0.587 ms</span><br></pre></td></tr></table></figure>
 <p>可以看到，发送的3个包都成功到达，包括网关在内，一共经过了5个路由器。</p>
 </li>
 </ol>
-<h2 id="第二个小实验-Cisco路由器IP组网模拟"><a class="header-anchor" href="#第二个小实验-Cisco路由器IP组网模拟">¶</a>第二个小实验 Cisco路由器IP组网模拟</h2>
-<p>按照实验要求搭建网络如下:<img src="%5Cimages%5Cblogimg%5Cpackettracer.png" alt=""></p>
+<h2 id="第二个小实验-Cisco路由器IP组网模拟"><a href="#第二个小实验-Cisco路由器IP组网模拟" class="headerlink" title="第二个小实验 Cisco路由器IP组网模拟"></a>第二个小实验 Cisco路由器IP组网模拟</h2><p>按照实验要求搭建网络如下:<img src="/.com//packettracer.png" alt></p>
 <p>其中，各计算机配置的默认网关均为对应连接的路由器接口的ip地址，如PC2的网关配置为192.168.2.1(Router1与Switch1连接的接口的地址)。</p>
 <ul>
-<li>
-<p>静态ip路由:</p>
+<li><p>静态ip路由:</p>
 <p>经过对配置参考的分析，目的网络应该配置需要经过路由器才能到达的网络，而网关则应该配置与本路由器相连的那个路由器对应接口的ip地址。</p>
 <p>各路由器的静态路由配置命令如下:</p>
 <p><strong>Router0</strong></p>
@@ -89,8 +78,7 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">C:\&gt;ping 192.168.2.101</span><br><span class="line"></span><br><span class="line">Pinging 192.168.2.101 with 32 bytes of data:</span><br><span class="line"></span><br><span class="line">Request timed out.</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line"></span><br><span class="line">Ping statistics for 192.168.2.101:</span><br><span class="line">    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),</span><br><span class="line">Approximate round trip times in milli-seconds:</span><br><span class="line">    Minimum = 0ms, Maximum = 0ms, Average = 0ms</span><br><span class="line"></span><br><span class="line">C:\&gt;ping 192.168.2.101</span><br><span class="line"></span><br><span class="line">Pinging 192.168.2.101 with 32 bytes of data:</span><br><span class="line"></span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time=4ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line"></span><br><span class="line">Ping statistics for 192.168.2.101:</span><br><span class="line">    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),</span><br><span class="line">Approximate round trip times in milli-seconds:</span><br><span class="line">    Minimum = 0ms, Maximum = 4ms, Average = 1ms</span><br></pre></td></tr></table></figure>
 <p>可以发现，一开始的时候ping不通，但是ping通以后就不会再出现超时的情况。并且经过的路由器越多，ping不通的次数就越多。</p>
 </li>
-<li>
-<p>动态ip路由</p>
+<li><p>动态ip路由</p>
 <p>根据配置参考所知，只需要把与路由器直连的子网放入RIP信息库即可，如对于Router0，就只用放入192.168.1.0和192.168.10.0</p>
 <p>各路由器的动态路由配置命令如下:</p>
 <p><strong>Router0</strong></p>
@@ -115,13 +103,11 @@
 <p>结合上网搜集资料和书P359~361页的内容，我们大概可以了解到，Ping的丢包大概是因为主机和路由器都首先需要获得目的机器的MAC地址，因此需要先发送ARP解析来获取MAC地址。当获取到MAC地址后，由于解析时间较长，已经被判定为超时。而每次超时后，主机会延长超时判断的时间，因此最后目的MAC地址可以正常返回，数据得以正常传输。我们大概可以推断，路由器越多，需要经过的ARP解析花费的时间就越多，超时的次数也就越多。利用Packet Tracer的Simulation功能，我们也可以进一步验证这一点。在Simulation中，确实出现了Ping超时的时候，“主机与路由器的通信不止一次”这种现象。</p>
 </li>
 </ul>
-<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结</h2>
-<ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
 <li><span id="forward"><strong>思考题1：</strong></span>net.ipv4.ip_forward配置决定了<strong>是否允许数据包转发</strong>。在前面的实验中，配置结果是0，表示禁止数据包转发。在内网主机与外网主机通信时，由于内网ip不能直接出现在Internet上，当内网向外网发送时，首先会经过网关使用NAT（网络地址转换），然后发给外网主机，外网主机返回的信息也只能发给网关，目的ip地址为网关地址，此时网关所做的将目的地址更改为内网主机ip地址，并发送数据包的过程就叫做数据包转发。只有拥有多个网卡，并且有在不同网卡间交换数据的设备才有设置数据包转发的需要。由以上分析知，<strong>在网关上该配置应该为1（允许数据包转发）</strong></li>
-<li>**思考题2：交换机接口可以隔离冲突域，而路由器接口还可以隔离广播域。**实验中当我们没有正确设置路由时，我们可以Ping通一个交换机连接的所有设备，甚至包括与交换机连接的路由器的端口，这是因为交换机（网桥）的泛洪算法会使得它在找不到目标地址时会向其除了发送方端口外的所有端口广播信息。然而路由器接口并不会将它收到的广播信息再次广播，它会严格按照路由表工作，这就达到了隔绝广播域的作用。</li>
-<li><strong>思考题3：<strong>总的来说，<strong>动态路由的使用方式更加简便</strong>，它只关心与本路由器相连的所有子网，相当于将网络划为一个个区域，每个区域之间开一个通道。但是由于没有直接的路径记录，<strong>这种路由方式的速度会慢于静态路由</strong>。<strong>静态路由的配置更加复杂</strong>，相当于把网络划分为了一条条道路，但是由于有着直接的ip地址对应，所以</strong>路由过程会更快</strong>。**动态路由适用于网络节点多变、管理员对网络整体架构不清楚、网络规模较大较复杂等场合。**若经常在路由器上增减网络，静态路由需要对所有路由器添加路由配置，但动态路由器只需要配置一个路由器即可。同理，如果一个网络有多个管理员，动态路由也可以使他们各司其职，只用专注于自己负责的路由器。<strong>而静态路由适用于对网络速度需求较大、结构比较固定、规模较小的场合。</strong></li>
-<li>我的收获与总结：
-<ol>
+<li><strong>思考题2：交换机接口可以隔离冲突域，而路由器接口还可以隔离广播域。</strong>实验中当我们没有正确设置路由时，我们可以Ping通一个交换机连接的所有设备，甚至包括与交换机连接的路由器的端口，这是因为交换机（网桥）的泛洪算法会使得它在找不到目标地址时会向其除了发送方端口外的所有端口广播信息。然而路由器接口并不会将它收到的广播信息再次广播，它会严格按照路由表工作，这就达到了隔绝广播域的作用。</li>
+<li><strong>思考题3：</strong>总的来说，<strong>动态路由的使用方式更加简便</strong>，它只关心与本路由器相连的所有子网，相当于将网络划为一个个区域，每个区域之间开一个通道。但是由于没有直接的路径记录，<strong>这种路由方式的速度会慢于静态路由</strong>。<strong>静态路由的配置更加复杂</strong>，相当于把网络划分为了一条条道路，但是由于有着直接的ip地址对应，所以<strong>路由过程会更快</strong>。<strong>动态路由适用于网络节点多变、管理员对网络整体架构不清楚、网络规模较大较复杂等场合。</strong>若经常在路由器上增减网络，静态路由需要对所有路由器添加路由配置，但动态路由器只需要配置一个路由器即可。同理，如果一个网络有多个管理员，动态路由也可以使他们各司其职，只用专注于自己负责的路由器。<strong>而静态路由适用于对网络速度需求较大、结构比较固定、规模较小的场合。</strong></li>
+<li>我的收获与总结：<ol>
 <li>熟悉了linux环境的使用，以及一些常用的网络指令，以及管道、重定向等功能。</li>
 <li>对于ip组网过程、各个设备的作用有了更深刻的理解。了解了静态路由配置和动态路由配置的区别。</li>
 <li>在实验中一开始出现了各主机之间Ping不通的情况，花了很大功夫调整设置都没有成功，最后在CSDN和B站的相关资料中发现了主机默认网关配置丢失，填上默认网关以后网络正常工作。尽管这浪费了几个小时的时间，但是也逼迫我对整个组网过程进行了刨根问底的分析，获得了更加充分的了解。</li>
@@ -142,11 +128,9 @@
   <entry>
     <title>代码的测试</title>
     <url>/2021/10/30/%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h3 id="C"><a class="header-anchor" href="#C">¶</a>C</h3>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&#x27;第%d次问候:你好!&#x27;</span>,i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="Python"><a class="header-anchor" href="#Python">¶</a>Python</h3>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y=ax^2+bx+c&quot;</span>)</span><br><span class="line">a=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input a:&quot;</span>))</span><br><span class="line">b=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input b:&quot;</span>))</span><br><span class="line">c=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input c:&quot;</span>))</span><br><span class="line">delta=b**<span class="number">2</span>-<span class="number">4</span>*a*c</span><br><span class="line"><span class="keyword">if</span> delta&gt;<span class="number">0</span>:</span><br><span class="line">    delta=delta**<span class="number">0.5</span></span><br><span class="line">    x1=(-b+delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    x2=(-b-delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;real root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f,x2=%.2f&quot;</span>%(x1,x2))</span><br><span class="line"><span class="keyword">elif</span> delta==<span class="number">0</span>:</span><br><span class="line">    x=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;same root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=x2=%.2f&quot;</span>%x)<span class="comment">#单个的不用括号</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    delta*=-<span class="number">1</span></span><br><span class="line">    delta**=<span class="number">0.5</span></span><br><span class="line">    rea=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    ima=delta</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;imaginary root!&quot;</span>)</span><br><span class="line">    <span class="comment">#print(&quot;x1=&quot;,rea,&quot;+&quot;,ima,&quot;i,x2=&quot;,rea,&quot;-&quot;,ima,&quot;i&quot;)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f+%.2fi,x2=%.2f-%.2fi&quot;</span>%(rea,ima,rea,ima))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;thank you!&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>行内的代码也可以用<code>printf(&quot;i'm code&quot;)</code>来表示。</p>
+    <content><![CDATA[<h3 id="C"><a href="#C" class="headerlink" title="C"></a>C</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&#x27;第%d次问候:你好!&#x27;</span>,i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y=ax^2+bx+c&quot;</span>)</span><br><span class="line">a=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input a:&quot;</span>))</span><br><span class="line">b=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input b:&quot;</span>))</span><br><span class="line">c=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input c:&quot;</span>))</span><br><span class="line">delta=b**<span class="number">2</span>-<span class="number">4</span>*a*c</span><br><span class="line"><span class="keyword">if</span> delta&gt;<span class="number">0</span>:</span><br><span class="line">    delta=delta**<span class="number">0.5</span></span><br><span class="line">    x1=(-b+delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    x2=(-b-delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;real root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f,x2=%.2f&quot;</span>%(x1,x2))</span><br><span class="line"><span class="keyword">elif</span> delta==<span class="number">0</span>:</span><br><span class="line">    x=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;same root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=x2=%.2f&quot;</span>%x)<span class="comment">#单个的不用括号</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    delta*=-<span class="number">1</span></span><br><span class="line">    delta**=<span class="number">0.5</span></span><br><span class="line">    rea=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    ima=delta</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;imaginary root!&quot;</span>)</span><br><span class="line">    <span class="comment">#print(&quot;x1=&quot;,rea,&quot;+&quot;,ima,&quot;i,x2=&quot;,rea,&quot;-&quot;,ima,&quot;i&quot;)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f+%.2fi,x2=%.2f-%.2fi&quot;</span>%(rea,ima,rea,ima))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;thank you!&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>行内的代码也可以用<code>printf(&quot;i&#39;m code&quot;)</code>来表示。</p>
 ]]></content>
       <categories>
         <category>test</category>
@@ -159,21 +143,11 @@
   <entry>
     <title>math</title>
     <url>/2021/10/30/math/</url>
-    <content><![CDATA[<h1>让我们来尝试一些数学公式</h1>
-<h2 id="Limits"><a class="header-anchor" href="#Limits">¶</a>Limits</h2>
-<p>$$<br>
-\lim_{x-&gt;\infty}\frac{\sin{\omega x}}{x^2}=0<br>
-$$</p>
-<h2 id="integral"><a class="header-anchor" href="#integral">¶</a>integral</h2>
-<p>$\int_0^\pi \sin{x^2}dx=2$</p>
-<h2 id="Fourier-Transform"><a class="header-anchor" href="#Fourier-Transform">¶</a>Fourier  Transform</h2>
-<p>$$<br>
-F(\omega)=\int_{-\infty}^{+\infty} f(t)e^{-j\omega t} dt<br>
-$$</p>
-<p>$$<br>
-f(t)=\frac{1}{2\pi}\int_{-\infty}^{+\infty} F(\omega)e^{j\omega t} d\omega<br>
-$$</p>
-]]></content>
+    <content><![CDATA[<h1 id="让我们来尝试一些数学公式"><a href="#让我们来尝试一些数学公式" class="headerlink" title="让我们来尝试一些数学公式"></a>让我们来尝试一些数学公式</h1><h2 id="Limits"><a href="#Limits" class="headerlink" title="Limits"></a>Limits</h2><script type="math/tex; mode=display">
+\lim_{x->\infty}\frac{\sin{\omega x}}{x^2}=0</script><h2 id="integral"><a href="#integral" class="headerlink" title="integral"></a>integral</h2><p>$\int_0^\pi \sin{x^2}dx=2$</p>
+<h2 id="Fourier-Transform"><a href="#Fourier-Transform" class="headerlink" title="Fourier  Transform"></a>Fourier  Transform</h2><script type="math/tex; mode=display">
+F(\omega)=\int_{-\infty}^{+\infty} f(t)e^{-j\omega t} dt</script><script type="math/tex; mode=display">
+f(t)=\frac{1}{2\pi}\int_{-\infty}^{+\infty} F(\omega)e^{j\omega t} d\omega</script>]]></content>
       <categories>
         <category>test</category>
       </categories>
