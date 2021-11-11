@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/silver/pace-theme-center-atom.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"changyan","storage":true,"lazyload":false,"nav":null,"activeClass":"changyan"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="第二次实验，TCP&#x2F;UDP通信程序设计，包括TCP回射程序、UDP使用Connect通信，以及一个TCP实时通信程序的编写。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机网络 第二次实验">
+<meta property="og:url" content="http://example.com/2021/11/11/second-exp-CN/index.html">
+<meta property="og:site_name" content="Crescent Rose">
+<meta property="og:description" content="第二次实验，TCP&#x2F;UDP通信程序设计，包括TCP回射程序、UDP使用Connect通信，以及一个TCP实时通信程序的编写。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/11/11/second-exp-CN/tcp.png">
+<meta property="og:image" content="http://example.com/2021/11/11/second-exp-CN/udp.png">
+<meta property="og:image" content="http://example.com/2021/11/11/second-exp-CN/tcp_duel.png">
+<meta property="og:image" content="http://example.com/2021/11/11/second-exp-CN/tcp_duel_error.png">
+<meta property="article:published_time" content="2021-11-11T13:00:37.000Z">
+<meta property="article:modified_time" content="2021-11-11T13:51:59.268Z">
+<meta property="article:author" content="crescent-rose">
+<meta property="article:tag" content="计算机网络">
+<meta property="article:tag" content="实验">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/11/11/second-exp-CN/tcp.png">
+
+
+<link rel="canonical" href="http://example.com/2021/11/11/second-exp-CN/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2021/11/11/second-exp-CN/","path":"2021/11/11/second-exp-CN/","title":"计算机网络 第二次实验"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>计算机网络 第二次实验 | Crescent Rose</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Crescent Rose</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">home sweet home</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">3</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">5</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AC%A1%E5%AE%9E%E9%AA%8C-TCP-UDP%E9%80%9A%E4%BF%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">第二次实验 TCP&#x2F;UDP通信程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81TCP%E9%80%9A%E4%BF%A1"><span class="nav-number">1.1.</span> <span class="nav-text">一、TCP通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81UDP%E9%80%9A%E4%BF%A1"><span class="nav-number">1.2.</span> <span class="nav-text">二、UDP通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TCP%E5%AE%9E%E6%97%B6%E9%80%9A%E4%BF%A1%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.3.</span> <span class="nav-text">三、TCP实时通信程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crescent-rose"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">crescent-rose</p>
+  <div class="site-description" itemprop="description">Tell me do you know how softly the breeze could sing</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crescentreinhard" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crescentreinhard" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1194969840@qq.com" title="E-Mail → mailto:1194969840@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7041136209&auto=1&height=230" style="opacity: 0.8"></iframe>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/11/second-exp-CN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crescent-rose">
+      <meta itemprop="description" content="Tell me do you know how softly the breeze could sing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crescent Rose">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机网络 第二次实验
+        </h1>
+
+        <div class="post-meta-container">
+          
+
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-11-11 21:00:37 / 修改时间：21:51:59" itemprop="dateCreated datePublished" datetime="2021-11-11T21:00:37+08:00">2021-11-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">实验报告</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2021/11/11/second-exp-CN/" class="post-meta-item leancloud_visitors" data-flag-title="计算机网络 第二次实验" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    
+      <a title="changyan" href="/2021/11/11/second-exp-CN/#SOHUCS" itemprop="discussionUrl">
+        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2021/11/11/second-exp-CN/" itemprop="commentCount"></span>
+      </a>
+    
+  </span>
+  
+  
+</div>
+
+            <div class="post-description">第二次实验，TCP/UDP通信程序设计，包括TCP回射程序、UDP使用Connect通信，以及一个TCP实时通信程序的编写。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="第二次实验-TCP-UDP通信程序设计"><a href="#第二次实验-TCP-UDP通信程序设计" class="headerlink" title="第二次实验 TCP/UDP通信程序设计"></a>第二次实验 TCP/UDP通信程序设计</h1><h2 id="一、TCP通信"><a href="#一、TCP通信" class="headerlink" title="一、TCP通信"></a>一、TCP通信</h2><ul>
+<li><p>客户端</p>
+<p>&emsp;&emsp;为了持续输入要发送的数据，同时接收服务器回射的文本信息，将原代码中发送数据部分修改如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 发送数据 */</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    	<span class="keyword">char</span> msg[<span class="number">50000</span>]=<span class="string">&quot;&quot;</span>;</span><br><span class="line">    	gets(msg);<span class="comment">//读取要发送的信息</span></span><br><span class="line">    	<span class="keyword">if</span>(<span class="built_in">strlen</span>(msg)&lt;=<span class="number">0</span>) <span class="keyword">break</span>;<span class="comment">//只键入回车（空白输入）时退出</span></span><br><span class="line">    	Send(sockfd, msg, <span class="built_in">strlen</span>(msg), <span class="number">0</span>);</span><br><span class="line">    	<span class="keyword">char</span> buf[TCP_BUF_LENGTH]=<span class="string">&quot;&quot;</span>;</span><br><span class="line">    	Recv(sockfd,buf,TCP_BUF_LENGTH,<span class="number">0</span>);<span class="comment">//接收回射数据</span></span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,buf);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;同时，原代码在运行程序时必须先运行ts再运行tc，否则客户端Connect失败后就会直接退出。因此，修改连接部分如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(connect(sockfd, (struct sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(struct sockaddr))==<span class="number">-1</span>);</span><br><span class="line"><span class="comment">//这里可以执行个sleep函数避免过于频繁的执行连接操作占用内存，不过实验中影响不大</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>服务器端</p>
+<p>&emsp;&emsp;服务器端只需要让其持续运行下去不断接收信息，再增加一个将信息回射的操作即可，因此只需修改接收数据部分：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 接收数据 */</span></span><br><span class="line">    <span class="keyword">char</span> buf[TCP_BUF_LENGTH];</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">size_t</span> pkt_len = Recv(client_sockfd, buf, TCP_BUF_LENGTH, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pkt_len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        buf[pkt_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Message received: [%zu bytes]\n&quot;</span>,pkt_len);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Connection closed\n&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;<span class="comment">//接收到空信息时退出</span></span><br><span class="line">    &#125;</span><br><span class="line">    Send(client_sockfd,buf,<span class="built_in">strlen</span>(buf),<span class="number">0</span>);<span class="comment">//回射信息，目标应该是client的套接字</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;最后发送和接收生成的随机代码，获得的结果如下图所示<img src="tcp.png" alt=""><br>​&emsp;&emsp;可以看到两个文件的md5加密是相同的，即程序确实完成了回射和接收回射功能。</p>
+</li>
+</ul>
+<h2 id="二、UDP通信"><a href="#二、UDP通信" class="headerlink" title="二、UDP通信"></a>二、UDP通信</h2><ul>
+<li><p>客户端</p>
+<p>&emsp;&emsp;根据要求，需要改成用Connect和Send替换Sendto，同时通过循环创建10个套接字给服务器发送信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 发送数据 */</span></span><br><span class="line"><span class="keyword">for</span>(;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">    sockfd = Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);<span class="comment">//创建套接字</span></span><br><span class="line">    Connect(sockfd, (struct sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br><span class="line">    <span class="keyword">char</span> *msg = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">    <span class="comment">//printf(&quot;Send message: %s[%zu bytes]\n&quot;, msg, strlen(msg));</span></span><br><span class="line">    Send(sockfd, msg, <span class="built_in">strlen</span>(msg), <span class="number">0</span>);</span><br><span class="line">    close(sockfd);<span class="comment">//因为只用发一次，所以每次用完就要关掉</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>服务器端</p>
+<p>&emsp;&emsp;根据要求，服务器端需要将客户端的ip地址与端口号显示出来，因此修改接收数据处代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 接收数据 */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">client_addr</span>;</span></span><br><span class="line">    <span class="keyword">int</span> client_addr_len = <span class="keyword">sizeof</span>(client_addr);</span><br><span class="line">    <span class="keyword">for</span>(;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">    <span class="keyword">char</span> buf[UDP_BUF_LENGTH];</span><br><span class="line">    <span class="keyword">size_t</span> pkt_len = Recvfrom(sockfd, buf, UDP_BUF_LENGTH, <span class="number">0</span>, (struct sockaddr *)&amp;client_addr, &amp;client_addr_len);</span><br><span class="line">    buf[pkt_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="comment">//printf(&quot;Message received: %s[%zu bytes]\n&quot;, buf, pkt_len);</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Received from %s:%d\n&quot;</span>,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));<span class="comment">//ip和端口号</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;这里用到了两个辅助函数：<code>inet_ntoa</code>和<code>ntohs</code>，其中前者是用来将类型为<code>inet_addr</code>类型的网络二进制地址转换为用’.’进行分割的常见ip地址形式。由于接收到的端口号是用<code>htons</code>转换为网络字节的，所以要想显示我们还需要用<code>ntohs</code>将其转换回来。</p>
+<p>&emsp;&emsp;最后程序运行效果如下：<img src="udp.png" alt=""><br>​&emsp;&emsp;可以看到每次返回的ip都是我们配置的ip地址，而端口不同，这是因为我们没有对发送方的套接字进行bind操作，端口均是随机分配的。</p>
+</li>
+</ul>
+<h2 id="三、TCP实时通信程序"><a href="#三、TCP实时通信程序" class="headerlink" title="三、TCP实时通信程序"></a>三、TCP实时通信程序</h2><p>&emsp;&emsp;fork函数可以创建一个子进程，与父进程同时执行，子进程和父进程通过<code>fork()</code>的返回值区分，父进程的<code>fork()</code>返回子函数的fpid（从1依序递增），而子进程的<code>fork()</code>返回0。如果我们设定两个进程一个接收一个发送，就可以完成终端的实时通信。具体实现思路如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*tcp实时通信*/</span></span><br><span class="line"><span class="keyword">pid_t</span> fpid=fork();<span class="comment">//创建子进程</span></span><br><span class="line"><span class="keyword">if</span>(fpid&lt;<span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">&quot;error in fork!&quot;</span>);</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (fpid!=<span class="number">0</span>)&#123;<span class="comment">//父进程</span></span><br><span class="line">    <span class="comment">/* tcp客户端 */</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//子进程</span></span><br><span class="line">    <span class="comment">/*tcp服务器端*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;这里tcp客户端与tcp服务器端与前面的TCP通信程序基本相同，不过可以删除掉服务器回射以及客户端接收回射的部分，再在服务器端部分整理一下该print的部分即可。</p>
+<p>&emsp;&emsp;但是还有一个显然的问题，<strong>我们需要两个服务器运行在不同的端口上</strong>，因此在net.h中添加以下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TCP_SERVER_PORT1 8003 <span class="comment">//8002被UDP占用了</span></span></span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;接下来，我们将上面的实时通信代码配置两份，并交叉设置其端口：</p>
+<ul>
+<li>代码1<ul>
+<li>客户端 ：目标为TCP_SERVER_PORT</li>
+<li>服务器端：服务器端口为TCP_SERVER_PORT1</li>
+</ul>
+</li>
+<li>代码2<ul>
+<li>客户端 ：目标为TCP_SERVER_PORT1</li>
+<li>服务器端：服务器端口为TCP_SERVER_PORT</li>
+</ul>
+</li>
+</ul>
+<p>&emsp;&emsp;此时运行这两份代码，就可以实现实时通信。如下图所示</p>
+<p><img src="tcp_duel.png" alt=""></p>
+<p>&emsp;&emsp;注意，<strong>由于此时发送与接收同时开始运行，因此发送端的<code>connect</code>函数的重试是不可缺少的</strong></p>
+<p>&emsp;&emsp;另外一个值得注意的地方是<strong>子进程与父进程分别负责什么部分，结果是不同的</strong>。最终的代码中由<strong>父进程负责发，子进程负责收</strong>，那么当A方发送完毕，A的发送进程和B的接收进程同时结束，因为接收是子进程，因此终端此时不会接管输入框，B的发送还可以继续，而A方的接收进程此时也还在运行，则B-&gt;A的通信还是可以继续。</p>
+<p>&emsp;&emsp;但是如果<strong>父进程负责收，子进程负责发</strong>，那么当A方发送完毕，B方的接收进程（父进程）结束，B的输入框将会被交还给终端，因此无法再继续实现B-&gt;A的通信，此时只能ctrl+c强行终止A的接收程序。如下图所示<img src="tcp_duel_error.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><p><strong>思考题1：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">    <span class="keyword">short</span>   sin_family;</span><br><span class="line">    u_short sin_port;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span>  <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span></span><br><span class="line">    <span class="keyword">char</span>    sin_zero[<span class="number">8</span>];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*以下是一个实例*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">server_addr</span> =</span> &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    server_addr.sin_family = AF_INET;<span class="comment">//IPv4协议</span></span><br><span class="line">    server_addr.sin_addr.s_addr = inet_addr(<span class="string">&quot;127.0.0.1&quot;</span>);<span class="comment">//IP地址</span></span><br><span class="line">    server_addr.sin_port = htons(<span class="number">8001</span>);<span class="comment">//端口为8001</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>这里的sin是sockaddr_in的缩写</li>
+<li><code>sin_family</code>是套接字的协议族，如<code>AF_INET</code>表示TCP/IP协议（ipv4），<code>AF_INET6</code>可以用来表示ipv6协议。</li>
+<li><code>sin_port</code>表示端口号，但是是经过<code>htons(port)</code>函数转换过后的网络字节顺序。</li>
+<li><code>sin_addr</code>表示ip地址，这里也需要使用函数<code>inet_addr(ip_addr)</code>将平常的点分十进制表示法转换为网络字节顺序的二进制数据。</li>
+<li><code>sin_zero</code>用作占位，使<code>sockaddr_in</code>的长度与<code>sockaddr</code>相同。我们可以计算一下：<code>sockaddr</code>的长度为$2+14=16$Byte，而<code>sockaddr_in</code>除去占位时长度为$2+2+\frac{32}{8}=8$Byte，因此sin_zero恰好为$8$Byte。</li>
+</ul>
+</li>
+<li><p><strong>思考题2：</strong></p>
+<ol>
+<li>非连接的客户端在建立socket时直接创建一个套接字，指定其协议族、类型、传输协议即可。</li>
+<li>面向连接的客户端在同样建立socket以后还需要先使用<code>connect()</code>函数与服务器端建立连接后才可以进行数据的收发。</li>
+</ol>
+</li>
+<li><p><strong>思考题3：</strong></p>
+<ol>
+<li>非连接的客户端在收发数据之前不需要建立连接，并且需要使用<code>sendto()</code>函数和<code>recvfrom()</code>函数发送、接收信息，前者需要带上目的地址，而后者会返回发送方地址。</li>
+<li>面向连接的客户端在收发数据之前需要先建立连接，并且只需要使用<code>send()</code>和<code>recv()</code>函数收发信息。</li>
+</ol>
+</li>
+<li><p><strong>思考题4：</strong></p>
+<ul>
+<li>面向连接的通信的<strong>优点是稳定和可靠性</strong>。它能保证数据的稳定、有序传输，还能在一定程度上进行拥塞控制。它的<strong>缺点是占用资源较多</strong>（如在服务器端需要为每个客户分配对应的响应套接字）、<strong>建立连接需要时间</strong>。它适合工作在传输数据量较大、追求稳定通信或者噪音特别大的场合。如精密传感器等与主机的通信、文件的下载等。</li>
+<li>无连接通信的<strong>优点是传输速度快</strong>。它不需要提前建立连接，不需要接收方的确认，因而可以用更大的速度传输数据。它的<strong>缺点是传输数据不稳定、无反馈</strong>，对于数据丢包、乱序等情况完全无法处理。它适合工作在实时通信、短时间、小数据量的通信情况。如视频聊天、网络电话，以及对服务器的一些小数据量的请求（如DNS）等。</li>
+</ul>
+</li>
+<li><p><strong>思考题5：</strong></p>
+<p>&emsp;&emsp;实验中使用socket工作在阻塞方式。<strong>阻塞方式与非阻塞方式的不同在于它们对于一些函数的响应方式不同。</strong>这些函数主要有<code>send(),recv(),sendto(),recvfrom(),accept()</code>。对于工作在阻塞方式的socket，调用这些函数时将会阻塞在原地直到任务完成或者有错误发生。例如，<code>accept()</code>函数在阻塞时会一直等到有客户连接才继续下面的程序，而非阻塞时只接收被调用时存在的客户连接，若没有则立刻执行下面的程序。<code>recv()</code>函数在阻塞时会一直等到收到消息，而在非阻塞时若无消息则立即返回。</p>
+</li>
+<li><p><strong>我的收获与总结</strong>：</p>
+<ol>
+<li>这次实验完成了TCP和UDP通信的过程，使我对TCP、UDP协议、套接字和它们的程序实现有了更深的印象。同时，也学习了用linux编译C语言代码的方法，以及使用makefile进行批量重复的操作。最后，学习了linux操作系统unistd.h头文件里的fork()实现多进程编程的方法。</li>
+</ol>
+<blockquote>
+<p>下面两个补充是基于思考题和平常以及实验过程中所见到的现象进行的进一步探究。</p>
+</blockquote>
+<ol>
+<li><p><strong>对思考题3的一些补充：</strong>实验中的UDP要求使用connect实现，但是<u>实际上此时的UDP仍然是一个无连接的服务！</u><code>connect()</code>函数的作用是为套接字设定了目的地址，但是并未与服务器建立连接，也就是说，<strong>无论服务器端口有没有被监听，甚至有没有开启，<code>connect(),send()</code>函数都会正常的执行下去。</strong>如果我们实验中先开启客户端，会发现客户端在服务器还未打开时就显示发送完毕，而服务器端显然收不到数据。</p>
+</li>
+<li><p><strong>对思考题5的一些补充：</strong></p>
+</li>
+</ol>
+<ul>
+<li><p>网上的资料说<code>connect()</code>函数也会阻塞，但是经过测试发现，<strong>实验中的连接函数并不会阻塞</strong>，它在连接失败时会立即返回-1，并不会等待到连接的建立。</p>
+</li>
+<li><p>对于<code>send()</code>和<code>sendto()</code>函数的阻塞可能不是很好理解，就像上面所说，服务器未打开时<code>sendto()</code>也可以正常运行，这是因为<strong>这两个函数如同其他一些通信(例如单片机的串口通信)一样，功能仅仅是将信息送到发送区的缓冲栈中，而发送操作由系统自己完成。</strong>因此它阻塞的条件是发送区的缓冲栈是否已满。<u>因此当它们返回时，信息不一定已经被目标接收，甚至不一定已经发送出去了。</u></p>
+</li>
+<li><p>那么TCP怎么实现它的确认功能呢，毕竟数据还没被确认函数就已经返回了？这都交给系统内部自己完成。由于要发送的数据已经保存在缓冲区中，因此它可以在超时后重传，直到收到确认后再将数据删除，腾出缓冲区的空间来。也就是说，<strong>我们所调用的<code>send()</code>函数其实与真正的发送过程还隔了一层</strong>。</p>
+</li>
+<li><p>对于除了C以外的某些语言，阻塞与非阻塞还有其他的区别。例如在python中写tcp通信时</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buf=socket.recv(<span class="number">1024</span>).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>若配置在阻塞状态，那么它在收到数据之前不会以任何形式被阻止，除非整个程序被强制关闭</strong>，包括ctrl+c的强制停止都无法退出该函数。这对于调试过程是十分不便的，因此需要配置成非阻塞状态以保证有手段将其退出。</p>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 计算机网络</a>
+              <a href="/tags/%E5%AE%9E%E9%AA%8C/" rel="tag"><i class="fa fa-tag"></i> 实验</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/11/03/first_exp_CN/" rel="prev" title="计算机网络 第一次实验">
+                  <i class="fa fa-chevron-left"></i> 计算机网络 第一次实验
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crescent-rose</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div><script color="255,195,229" opacity="0.8" zIndex="-1" count="60" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.5.0/pjax.min.js" integrity="sha256-3NkoLDrmHLTYj7csHIZSr0MHAFTXth7Ua/DDt4MRUAg=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"QKlDUUO4mdUbibGWqFJAqBp5-gzGzoHsz","app_key":"iQDfFMrAGWFRnFzV6UysgsEM","server_url":null,"security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js","integrity":"sha256-r+3itOMtGGjap0x+10hu6jW/gZCzxHsoKrOd7gyRSGY="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cyvJuGIYj","appkey":"983db1cd8748d44113daf6e861658727"}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginModelPath":"assets/","model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+<script type="text/javascript" src="/js/clicklove.js"></script>
