@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/silver/pace-theme-center-atom.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"changyan","storage":true,"lazyload":false,"nav":null,"activeClass":"changyan"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="第三次实验，RDT通信程序设计，停-等协议和Go back N协议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机网络 第三次实验">
+<meta property="og:url" content="http://example.com/2021/11/17/third-exp-CN/index.html">
+<meta property="og:site_name" content="Crescent Rose">
+<meta property="og:description" content="第三次实验，RDT通信程序设计，停-等协议和Go back N协议。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-17T13:00:21.000Z">
+<meta property="article:modified_time" content="2021-11-17T13:02:47.941Z">
+<meta property="article:author" content="crescent-rose">
+<meta property="article:tag" content="计算机网络">
+<meta property="article:tag" content="实验">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/11/17/third-exp-CN/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2021/11/17/third-exp-CN/","path":"2021/11/17/third-exp-CN/","title":"计算机网络 第三次实验"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>计算机网络 第三次实验 | Crescent Rose</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Crescent Rose</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">home sweet home</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">6</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">3</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">6</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">第三次实验 RDT通信程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%81%9C-%E7%AD%89%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.1.</span> <span class="nav-text">一、停-等协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E7%AB%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">接收端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E7%AB%AF"><span class="nav-number">1.1.2.</span> <span class="nav-text">发送端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9B%9E%E9%80%80N%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.2.</span> <span class="nav-text">二、回退N协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E7%AB%AF-v2"><span class="nav-number">1.2.1.</span> <span class="nav-text">接收端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E7%AB%AF-v2"><span class="nav-number">1.2.2.</span> <span class="nav-text">发送端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="crescent-rose"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">crescent-rose</p>
+  <div class="site-description" itemprop="description">Tell me do you know how softly the breeze could sing</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/crescentreinhard" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;crescentreinhard" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1194969840@qq.com" title="E-Mail → mailto:1194969840@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 src="//music.163.com/outchain/player?type=0&id=7041136209&auto=1&height=230" style="opacity: 0.8"></iframe>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/17/third-exp-CN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crescent-rose">
+      <meta itemprop="description" content="Tell me do you know how softly the breeze could sing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Crescent Rose">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机网络 第三次实验
+        </h1>
+
+        <div class="post-meta-container">
+          
+
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-11-17 21:00:21 / 修改时间：21:02:47" itemprop="dateCreated datePublished" datetime="2021-11-17T21:00:21+08:00">2021-11-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">实验报告</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2021/11/17/third-exp-CN/" class="post-meta-item leancloud_visitors" data-flag-title="计算机网络 第三次实验" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    
+      <a title="changyan" href="/2021/11/17/third-exp-CN/#SOHUCS" itemprop="discussionUrl">
+        <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2021/11/17/third-exp-CN/" itemprop="commentCount"></span>
+      </a>
+    
+  </span>
+  
+  
+</div>
+
+            <div class="post-description">第三次实验，RDT通信程序设计，停-等协议和Go back N协议。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1>第三次实验 RDT通信程序设计</h1>
+<h2 id="一、停-等协议"><a class="header-anchor" href="#一、停-等协议">¶</a>一、停-等协议</h2>
+<h3 id="接收端"><a class="header-anchor" href="#接收端">¶</a>接收端</h3>
+<p>​	接收端需要修改的代码如下：</p>
+<p>​	首先，需要接收RDT数据</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1. 接收RDT数据包</span></span><br><span class="line">        <span class="keyword">char</span> rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> pkt_len = recv(sockfd,rdt_pkt,RDT_PKT_LEN,<span class="number">0</span>);<span class="comment">//已修改！！！</span></span><br></pre></td></tr></table></figure>
+<p>​	之后对其解封装</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 2. 解封装RDT数据包</span></span><br><span class="line">       <span class="keyword">char</span> rdt_data[RDT_DATA_LEN];</span><br><span class="line">       <span class="keyword">int</span> seq_num, flag;</span><br><span class="line">       <span class="keyword">int</span> data_len =unpack_rdt_pkt(rdt_data,rdt_pkt,pkt_len,&amp;seq_num,&amp;flag);<span class="comment">//已修改！！！</span></span><br></pre></td></tr></table></figure>
+<p>​	然后检查此数据包是否为期待的数据包</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 3. 检查此数据包是否为期待的数据包 : seq_num==exp_seq_num</span></span><br><span class="line">        <span class="keyword">int</span> ackflag=RDT_CTRL_ACK;</span><br><span class="line">        <span class="keyword">if</span>(seq_num!=exp_seq_num)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pack #%d received! &quot;</span>,seq_num);</span><br><span class="line">            <span class="keyword">if</span>(seq_num&lt;exp_seq_num)&#123;<span class="comment">//已经接收到，仍需返回ACK</span></span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;already exist\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;not exist but wrong\n&quot;</span>);<span class="comment">//接收到了更后面的包，不予理会</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pack #%d received! length:%dbytes\n&quot;</span>,seq_num,data_len);</span><br><span class="line">            exp_seq_num++;</span><br><span class="line">            fwrite(rdt_data,<span class="keyword">sizeof</span>(<span class="keyword">char</span>),data_len/<span class="keyword">sizeof</span>(<span class="keyword">char</span>),fp);</span><br><span class="line">            total_recv_byte+=data_len;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>​	最后封装一个新的ACK包并发送</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 4. 封装一个新的RDT数据包(ACK包)</span></span><br><span class="line">        <span class="keyword">char</span> reply_rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> reply_pkt_len=pack_rdt_pkt(<span class="literal">NULL</span>,reply_rdt_pkt,<span class="number">0</span>,seq_num,ackflag);<span class="comment">//已修改！！！</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 5. 调用不可靠数据传输发送新的RDT数据包(ACK包)</span></span><br><span class="line">        udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);<span class="comment">//已修改</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (flag == RDT_CTRL_END) &#123;</span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);<span class="comment">//保险用</span></span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);</span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>​	需要注意的是这里有一个问题：<strong>接收方对于结束包的ACK如果丢包了，由于接收端已经关闭，则发送方会永远的发送结束包导致无法结束进程</strong>，由于每一个ACK包总是有几率丢包，**我们理论上无法阻止这种情况，但是可以尽量避免。**例如在这里采用了对结束包发送4次的方法，由于丢包率为$10%$，理论上四包全丢将会是$0.01%$的概率，在实验中已经足够避免异常。现实中更加常用的办法将在思考题3中讨论。</p>
+<h3 id="发送端"><a class="header-anchor" href="#发送端">¶</a>发送端</h3>
+<p>​	发送端需要修改的代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1. 封装RDT数据包</span></span><br><span class="line">        <span class="keyword">char</span> rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> pkt_len = pack_rdt_pkt(rdt_data,rdt_pkt,data_len,seq_num,flag);<span class="comment">//已修改!!!</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 2. 发送RDT数据包，重传直到收到ACK</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// step 2-1. 调用不可靠数据传输发送新的RDT数据包</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[Sender]Packet #%d: %d bytes. Send count #%d\n&quot;</span>, seq_num, pkt_len, counter++);</span><br><span class="line">            udt_send(sockfd,rdt_pkt,pkt_len,<span class="number">0</span>);<span class="comment">//已修改！！！</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// step 2-2. 一直等待到文件描述符集合中某个文件有可读数据，或者到达超时时限： poll()</span></span><br><span class="line">            <span class="comment">/*已修改！！！！！！！！！！！！！！！！！！！！！！！！！*/</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">pollfd</span> =</span> &#123;sockfd, POLLIN&#125;;</span><br><span class="line">            <span class="keyword">if</span>(poll(&amp;pollfd,<span class="number">1</span>,RDT_TIME_OUT)&gt;<span class="number">0</span>)&#123;<span class="comment">//fds长度为1</span></span><br><span class="line">                <span class="keyword">char</span> rdt_pkt_rcv[RDT_PKT_LEN];</span><br><span class="line">                <span class="keyword">int</span> pkt_len_rcv=recv(sockfd,rdt_pkt_rcv,RDT_PKT_LEN,<span class="number">0</span>);<span class="comment">//接收ACK</span></span><br><span class="line">                <span class="keyword">char</span> rdt_data_rcv[RDT_DATA_LEN];</span><br><span class="line">                <span class="keyword">int</span> seq_num_rcv, flag_rcv;</span><br><span class="line">                unpack_rdt_pkt(rdt_data_rcv,rdt_pkt_rcv,pkt_len_rcv,&amp;seq_num_rcv,&amp;flag_rcv);<span class="comment">//已修改！！！</span></span><br><span class="line">                <span class="keyword">if</span>(flag_rcv==RDT_CTRL_ACK&amp;&amp;seq_num_rcv==seq_num) <span class="keyword">break</span>;<span class="comment">//正确的ACK包</span></span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 3. 发送成功，更新seq_num和total_send_byte</span></span><br><span class="line">        <span class="comment">/* 已修改！！！！！！！！！！！！！！！！！！！！ */</span></span><br><span class="line">        seq_num++;</span><br><span class="line">        total_send_byte+=data_len;</span><br></pre></td></tr></table></figure>
+<h2 id="二、回退N协议"><a class="header-anchor" href="#二、回退N协议">¶</a>二、回退N协议</h2>
+<h3 id="接收端-v2"><a class="header-anchor" href="#接收端-v2">¶</a>接收端</h3>
+<p>​	回退N协议的接收端与停-等协议的接收端是相同的。</p>
+<h3 id="发送端-v2"><a class="header-anchor" href="#发送端-v2">¶</a>发送端</h3>
+<p>​	发送端需要修改的代码如下：</p>
+<p>​	滑动窗口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 1. 如果滑动窗口最左端的包已经收到ACK，则将滑动窗口滑动到下一个没收到ACK的包的位置。</span></span><br><span class="line">    <span class="comment">/* TODO */</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">        <span class="keyword">int</span> i=send_window.left;</span><br><span class="line">        StatePkt *ptr_pkt=&amp;send_window.rdt_pkts[i% send_window.len];</span><br><span class="line">        <span class="keyword">if</span>(ptr_pkt-&gt;state==RDT_PKT_ST_ACKED&amp;&amp;i==ptr_pkt-&gt;pkt_seq)&#123;<span class="comment">//收到ACK</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[main thread] pack #%d acked,left++\n&quot;</span>,ptr_pkt-&gt;pkt_seq);</span><br><span class="line">            send_window.left++;<span class="comment">//左移窗口</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;<span class="comment">//检测到没有收到ACK的包，停止滑动</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>​	填充数据包</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step 2. 将新数据包装入滑动窗口右端空缺位置。</span></span><br><span class="line">    <span class="keyword">int</span> pkt_to_send = <span class="number">0</span>; <span class="comment">// 需要发送的数据包个数</span></span><br><span class="line">    <span class="comment">/* TODO */</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=send_window.right;send_window.right-send_window.left&lt;send_window.len;i++)&#123;<span class="comment">//一直填充到最大的发送窗口</span></span><br><span class="line">        <span class="keyword">if</span> (feof(fp)) <span class="keyword">break</span>;<span class="comment">//没有数据了就结束</span></span><br><span class="line">        StatePkt *ptr_pkt=&amp;send_window.rdt_pkts[i %send_window.len];</span><br><span class="line">        <span class="keyword">char</span> rdt_data[RDT_DATA_LEN];</span><br><span class="line">        <span class="keyword">int</span> data_len = fread(rdt_data, <span class="keyword">sizeof</span>(<span class="keyword">char</span>), RDT_DATA_LEN, fp);</span><br><span class="line">        <span class="keyword">int</span> pkt_len = pack_rdt_pkt(rdt_data,ptr_pkt-&gt;rdt_pkt,data_len,i,RDT_CTRL_DATA);</span><br><span class="line">        ptr_pkt-&gt;state=RDT_PKT_ST_INIT;<span class="comment">//填充数据包</span></span><br><span class="line">        ptr_pkt-&gt;pkt_seq=i;</span><br><span class="line">        ptr_pkt-&gt;pkt_len=pkt_len;</span><br><span class="line">        send_window.right++;<span class="comment">//滑动窗口</span></span><br><span class="line">        pkt_to_send++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>​	这里需要注意的是，由于初始化时<code>send_window.left=send_window.left</code>，而且最后结束时仍以<code>send_window.left==send_window.left</code>为判断条件，因此不能将窗口每次都整体滑动，而是应该在满足窗口长度小于最大窗口长度的前提下根据需要分别滑动窗口左右边界。</p>
+<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结</h2>
+<ul>
+<li>
+<p>**思考题1：**这个问题实际上在前一次实验报告中已经有了详尽的讨论，在这里再做一次摘要。**能够使用<code>send()</code>和<code>recv()</code>函数是因为套接字在收发前使用了<code>connect()</code>函数。**这里的<code>connect()</code>函数与TCP中不同，它实际上并没有和目标地址建立连接，只不过是为套接字绑定了一个目标地址，其之后无论收发都会以这个地址为目标。也正是由于这个特性，此时发送端和接收端都需要绑定一个不变的端口，因为它们都需要预先知道对方的地址，这与上一次实验中只需要对服务器端使用bind绑定是不同的。我们可以在net.c中两个socket的初始化函数里找到以下部分：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//发送端</span></span><br><span class="line">bind(sockfd, (struct sockaddr *)&amp;send_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br><span class="line">connect(sockfd, (struct sockaddr *)&amp;recv_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br><span class="line"></span><br><span class="line"><span class="comment">//接收端</span></span><br><span class="line">bind(sockfd, (struct sockaddr *)&amp;recv_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br><span class="line">connect(sockfd, (struct sockaddr *)&amp;send_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br></pre></td></tr></table></figure>
+<p>这也佐证了我们之前的分析。并且也如前一次报告中所提到的，send函数成功返回并不代表接收方已经收到，甚至也不代表已经发送完成，只是成功将其送至系统内发送缓冲区。</p>
+</li>
+<li>
+<p>**思考题2：**在传统停-等协议里，发送端为每个包设置一定时器，若在定时器超时后没有收到正确的响应则重传；在本实验中则略有不同，**发送端为每个包的每次发送开展一个有超时时间$t$的轮询，若达到超时时间后或者接收到的不是正确的ACK响应则重传。**值得注意的是，若没有接收到ACK，则这个$t$就是超时重传的超时时间，若收到了错误的ACK，则此时重传的时间实际上是小于$t$的，所以在本实验中，超时时间实际上是在变化的。</p>
+</li>
+<li>
+<p>**思考题3：双方正确结束通信理论上是永远无法保证的。**因为我们无论引入再多的确认机制，在极端的情况下所有的确认都有可能丢失，最后总有一方会被永远的挂在通信中无法结束。因此人们选择了“三次握手”的法则进行连接的释放。假设A方发起了通信的结束信号，则B在接收到该信号后需要给A回复一个结束信号，A在收到该结束信号后发送一个响应信号并结束通信，B在收到响应后也结束通信。当A没有收到结束信号或者B没有收到响应信号时，它们都会进行超时重传。同时，为了防止一方已关闭连接而另一方仍然在重传，需要对重传次数设限，超限后连接将自动断开。又为了防止所有重传真的都丢失了，设定在连接不活跃一段时间后自动关闭连接。这样一个协议，不能保证正确结束通信，但是至少可以防止一方被永远挂起的情况。</p>
+</li>
+<li>
+<p>**思考题4：这是为了防止旧的接收窗口和新的接收窗口重叠，导致数据包被错误识别。**考虑一个2位序号的滑动窗口协议，接收和发送窗口大小最大都是3。当接收与发送都是[0,1,2]时，发送端数据全部到达接收，接收端滑动窗口为[3,0,1]，而返回的ACK全部丢失了，发送端选择重新传输旧的[0,1,2]，由于此时[0,1]有重叠，它们又被当做新的数据包被接收了，再加上发送窗口收到[0,1]的应答后又会继续发送[2,3,0]，包含接收端的[3]，接收端又能正常的滑动窗口。因此这个协议并不会阻塞在某处，而是神不知鬼不觉的传输了错误的数据包。为了避免这种现象，我们需要接收方滑动窗口后与发送方上一次发送的窗口不重叠。由此我们可以得到$RW.right+(SW.right-RW.left)-SEQ≤SW.left$,即$RWS+SWS≤SEQ$,式中RW，SW，SEQ分别表示接收、发送窗口和序号长度。为了高效不浪费还应考虑$SWS≥RWS$，因此可以得到接收窗口的大小必须小于或等于序列号空间大小的一半。</p>
+</li>
+<li>
+<p>我的收获与总结</p>
+<ol>
+<li>学习了RDT协议的相关知识，进行了RDT通信程序的设计，了解了传输层的滑动窗口协议。</li>
+<li>对socket中的函数有了更深的理解，学习利用多线程进行通信。</li>
+<li>
+<ul>
+<li>本次实验可以很直观的看到回退N协议与停等协议在有噪信道上的效率。在两张实验记录图中记录下了两个协议传输同样大小的文件所用时间：约2.43秒（停-等协议）和约10.93秒（回退N）协议，这说明由于回退N协议在丢包率较高时需要大量重传已经发送成功的数据，其实际上的运行效率甚至不如停-等协议。</li>
+<li>我注意到回退N协议输出了大量的内容，为了排除<code>printf()</code>函数带来的影响，我去掉了除显示发送时间外的所有输出语句，得到如下结果：约2.40秒（停-等协议）和约8.86秒（回退N）协议，说明此时回退N效率确实不如停-等协议。</li>
+<li>再来看看丢包率为0的情况：约0.29秒（停-等协议）和约0.0244秒（回退N）协议，这时就能很直观的体会到回退N协议的高效了。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 计算机网络</a>
+              <a href="/tags/%E5%AE%9E%E9%AA%8C/" rel="tag"><i class="fa fa-tag"></i> 实验</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/11/11/second-exp-CN/" rel="prev" title="计算机网络 第二次实验">
+                  <i class="fa fa-chevron-left"></i> 计算机网络 第二次实验
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crescent-rose</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div><script color="255,195,229" opacity="0.8" zIndex="-1" count="60" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.5.0/pjax.min.js" integrity="sha256-3NkoLDrmHLTYj7csHIZSr0MHAFTXth7Ua/DDt4MRUAg=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"QKlDUUO4mdUbibGWqFJAqBp5-gzGzoHsz","app_key":"iQDfFMrAGWFRnFzV6UysgsEM","server_url":null,"security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js","integrity":"sha256-r+3itOMtGGjap0x+10hu6jW/gZCzxHsoKrOd7gyRSGY="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cyvJuGIYj","appkey":"983db1cd8748d44113daf6e861658727"}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginModelPath":"assets/","model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+<script type="text/javascript" src="/js/clicklove.js"></script>
