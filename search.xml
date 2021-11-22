@@ -3,7 +3,9 @@
   <entry>
     <title>欢迎</title>
     <url>/2021/10/28/welcome/</url>
-    <content><![CDATA[<h1 id="欢迎！"><a href="#欢迎！" class="headerlink" title="欢迎！"></a>欢迎！</h1><h2 id="Hello-world"><a href="#Hello-world" class="headerlink" title="Hello world!"></a>Hello world!</h2><p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左下角的按钮。</p>
+    <content><![CDATA[<h1>欢迎！</h1>
+<h2 id="Hello-world"><a class="header-anchor" href="#Hello-world">¶</a>Hello world!</h2>
+<p>欢迎来到我的个人主页，如果你是移动端的用户，想要关闭音乐的话，可以点击左下角的按钮。</p>
 <p>也可以通过左下角的按钮进行站内文章的搜索</p>
 <p>祝你玩的开心!</p>
 ]]></content>
@@ -20,30 +22,36 @@
     <url>/2021/11/17/third-exp-CN/</url>
     <content><![CDATA[<h1>第三次实验 RDT通信程序设计</h1>
 <h2 id="一、停-等协议"><a class="header-anchor" href="#一、停-等协议">¶</a>一、停-等协议</h2>
+<p>  停等协议相当于接收和发送都只有一位的滑动窗口协议，发送方发送完每一个数据包后都会开始计时并阻塞，直到超时重传或者收到正确的ACK。接收方对接收到的未损坏的数据包，都应该回复ACK（哪怕已经ACK过），当一个数据包成功发送后，发送窗口滑动一位；当成功收到一个正确数据包后，接收窗口滑动一位。</p>
 <h3 id="接收端"><a class="header-anchor" href="#接收端">¶</a>接收端</h3>
-<p>​	接收端需要修改的代码如下：</p>
-<p>​	首先，需要接收RDT数据</p>
+<p>​  接收端需要修改的代码如下：</p>
+<p>​  首先，需要接收RDT数据</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 1. 接收RDT数据包</span></span><br><span class="line">        <span class="keyword">char</span> rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> pkt_len = recv(sockfd,rdt_pkt,RDT_PKT_LEN,<span class="number">0</span>);<span class="comment">//已修改！！！</span></span><br></pre></td></tr></table></figure>
-<p>​	之后对其解封装</p>
+<p>​  之后对其解封装</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 2. 解封装RDT数据包</span></span><br><span class="line">       <span class="keyword">char</span> rdt_data[RDT_DATA_LEN];</span><br><span class="line">       <span class="keyword">int</span> seq_num, flag;</span><br><span class="line">       <span class="keyword">int</span> data_len =unpack_rdt_pkt(rdt_data,rdt_pkt,pkt_len,&amp;seq_num,&amp;flag);<span class="comment">//已修改！！！</span></span><br></pre></td></tr></table></figure>
-<p>​	然后检查此数据包是否为期待的数据包</p>
+<p>​  然后检查此数据包是否为期待的数据包</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 3. 检查此数据包是否为期待的数据包 : seq_num==exp_seq_num</span></span><br><span class="line">        <span class="keyword">int</span> ackflag=RDT_CTRL_ACK;</span><br><span class="line">        <span class="keyword">if</span>(seq_num!=exp_seq_num)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pack #%d received! &quot;</span>,seq_num);</span><br><span class="line">            <span class="keyword">if</span>(seq_num&lt;exp_seq_num)&#123;<span class="comment">//已经接收到，仍需返回ACK</span></span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;already exist\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;not exist but wrong\n&quot;</span>);<span class="comment">//接收到了更后面的包，不予理会</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pack #%d received! length:%dbytes\n&quot;</span>,seq_num,data_len);</span><br><span class="line">            exp_seq_num++;</span><br><span class="line">            fwrite(rdt_data,<span class="keyword">sizeof</span>(<span class="keyword">char</span>),data_len/<span class="keyword">sizeof</span>(<span class="keyword">char</span>),fp);</span><br><span class="line">            total_recv_byte+=data_len;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-<p>​	最后封装一个新的ACK包并发送</p>
+<p>​  最后封装一个新的ACK包并发送</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 4. 封装一个新的RDT数据包(ACK包)</span></span><br><span class="line">        <span class="keyword">char</span> reply_rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> reply_pkt_len=pack_rdt_pkt(<span class="literal">NULL</span>,reply_rdt_pkt,<span class="number">0</span>,seq_num,ackflag);<span class="comment">//已修改！！！</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 5. 调用不可靠数据传输发送新的RDT数据包(ACK包)</span></span><br><span class="line">        udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);<span class="comment">//已修改</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (flag == RDT_CTRL_END) &#123;</span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);<span class="comment">//保险用</span></span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);</span><br><span class="line">            udt_send(sockfd,reply_rdt_pkt,reply_pkt_len,<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-<p>​	需要注意的是这里有一个问题：<strong>接收方对于结束包的ACK如果丢包了，由于接收端已经关闭，则发送方会永远的发送结束包导致无法结束进程</strong>，由于每一个ACK包总是有几率丢包，**我们理论上无法阻止这种情况，但是可以尽量避免。**例如在这里采用了对结束包发送4次的方法，由于丢包率为$10%$，理论上四包全丢将会是$0.01%$的概率，在实验中已经足够避免异常。现实中更加常用的办法将在思考题3中讨论。</p>
+<p>​  需要注意的是这里有一个问题：<strong>接收方对于结束包的ACK如果丢包了，由于接收端已经关闭，则发送方会永远的发送结束包导致无法结束进程</strong>，由于每一个ACK包总是有几率丢包，**我们理论上无法阻止这种情况，但是可以尽量避免。**例如在这里采用了对结束包发送4次的方法，由于丢包率为$10%$，理论上四包全丢将会是$0.01%$的概率，在实验中已经足够避免异常。现实中更加常用的办法将在思考题3中讨论。</p>
 <h3 id="发送端"><a class="header-anchor" href="#发送端">¶</a>发送端</h3>
-<p>​	发送端需要修改的代码如下：</p>
+<p>​  发送端需要修改的代码如下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 1. 封装RDT数据包</span></span><br><span class="line">        <span class="keyword">char</span> rdt_pkt[RDT_PKT_LEN];</span><br><span class="line">        <span class="keyword">int</span> pkt_len = pack_rdt_pkt(rdt_data,rdt_pkt,data_len,seq_num,flag);<span class="comment">//已修改!!!</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 2. 发送RDT数据包，重传直到收到ACK</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// step 2-1. 调用不可靠数据传输发送新的RDT数据包</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[Sender]Packet #%d: %d bytes. Send count #%d\n&quot;</span>, seq_num, pkt_len, counter++);</span><br><span class="line">            udt_send(sockfd,rdt_pkt,pkt_len,<span class="number">0</span>);<span class="comment">//已修改！！！</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// step 2-2. 一直等待到文件描述符集合中某个文件有可读数据，或者到达超时时限： poll()</span></span><br><span class="line">            <span class="comment">/*已修改！！！！！！！！！！！！！！！！！！！！！！！！！*/</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">pollfd</span> =</span> &#123;sockfd, POLLIN&#125;;</span><br><span class="line">            <span class="keyword">if</span>(poll(&amp;pollfd,<span class="number">1</span>,RDT_TIME_OUT)&gt;<span class="number">0</span>)&#123;<span class="comment">//fds长度为1</span></span><br><span class="line">                <span class="keyword">char</span> rdt_pkt_rcv[RDT_PKT_LEN];</span><br><span class="line">                <span class="keyword">int</span> pkt_len_rcv=recv(sockfd,rdt_pkt_rcv,RDT_PKT_LEN,<span class="number">0</span>);<span class="comment">//接收ACK</span></span><br><span class="line">                <span class="keyword">char</span> rdt_data_rcv[RDT_DATA_LEN];</span><br><span class="line">                <span class="keyword">int</span> seq_num_rcv, flag_rcv;</span><br><span class="line">                unpack_rdt_pkt(rdt_data_rcv,rdt_pkt_rcv,pkt_len_rcv,&amp;seq_num_rcv,&amp;flag_rcv);<span class="comment">//已修改！！！</span></span><br><span class="line">                <span class="keyword">if</span>(flag_rcv==RDT_CTRL_ACK&amp;&amp;seq_num_rcv==seq_num) <span class="keyword">break</span>;<span class="comment">//正确的ACK包</span></span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// step 3. 发送成功，更新seq_num和total_send_byte</span></span><br><span class="line">        <span class="comment">/* 已修改！！！！！！！！！！！！！！！！！！！！ */</span></span><br><span class="line">        seq_num++;</span><br><span class="line">        total_send_byte+=data_len;</span><br></pre></td></tr></table></figure>
 <h2 id="二、回退N协议"><a class="header-anchor" href="#二、回退N协议">¶</a>二、回退N协议</h2>
+<p>  回退N协议中，发送窗口大小大于1，接收窗口大小仍为1。发送端发送完数据包后并不进入阻塞，而是继续发送窗口内剩余的数据包，并在每次发送完毕后为每个包设置一定时器，当接收到窗口最左边包的ACK时，窗口整体向右滑动一位，否则若窗口最左边的数据包超时或出错，则需要重传发送窗口内的所有数据包，哪怕它们中的一些已经收到了正确的ACK。在接收端，仍然需要为收到的每个未损坏的数据包回复ACK。很明显，这种重传所有数据包的形式是十分浪费带宽的。</p>
 <h3 id="接收端-v2"><a class="header-anchor" href="#接收端-v2">¶</a>接收端</h3>
-<p>​	回退N协议的接收端与停-等协议的接收端是相同的。</p>
+<p>​  回退N协议的接收端与停-等协议的接收端是相同的。</p>
 <h3 id="发送端-v2"><a class="header-anchor" href="#发送端-v2">¶</a>发送端</h3>
-<p>​	发送端需要修改的代码如下：</p>
-<p>​	滑动窗口</p>
+<p>​  发送端需要修改的代码如下：</p>
+<p>​  滑动窗口</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 1. 如果滑动窗口最左端的包已经收到ACK，则将滑动窗口滑动到下一个没收到ACK的包的位置。</span></span><br><span class="line">    <span class="comment">/* TODO */</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">        <span class="keyword">int</span> i=send_window.left;</span><br><span class="line">        StatePkt *ptr_pkt=&amp;send_window.rdt_pkts[i% send_window.len];</span><br><span class="line">        <span class="keyword">if</span>(ptr_pkt-&gt;state==RDT_PKT_ST_ACKED&amp;&amp;i==ptr_pkt-&gt;pkt_seq)&#123;<span class="comment">//收到ACK</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[main thread] pack #%d acked,left++\n&quot;</span>,ptr_pkt-&gt;pkt_seq);</span><br><span class="line">            send_window.left++;<span class="comment">//左移窗口</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;<span class="comment">//检测到没有收到ACK的包，停止滑动</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>​	填充数据包</p>
+<p>​  填充数据包</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// step 2. 将新数据包装入滑动窗口右端空缺位置。</span></span><br><span class="line">    <span class="keyword">int</span> pkt_to_send = <span class="number">0</span>; <span class="comment">// 需要发送的数据包个数</span></span><br><span class="line">    <span class="comment">/* TODO */</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=send_window.right;send_window.right-send_window.left&lt;send_window.len;i++)&#123;<span class="comment">//一直填充到最大的发送窗口</span></span><br><span class="line">        <span class="keyword">if</span> (feof(fp)) <span class="keyword">break</span>;<span class="comment">//没有数据了就结束</span></span><br><span class="line">        StatePkt *ptr_pkt=&amp;send_window.rdt_pkts[i %send_window.len];</span><br><span class="line">        <span class="keyword">char</span> rdt_data[RDT_DATA_LEN];</span><br><span class="line">        <span class="keyword">int</span> data_len = fread(rdt_data, <span class="keyword">sizeof</span>(<span class="keyword">char</span>), RDT_DATA_LEN, fp);</span><br><span class="line">        <span class="keyword">int</span> pkt_len = pack_rdt_pkt(rdt_data,ptr_pkt-&gt;rdt_pkt,data_len,i,RDT_CTRL_DATA);</span><br><span class="line">        ptr_pkt-&gt;state=RDT_PKT_ST_INIT;<span class="comment">//填充数据包</span></span><br><span class="line">        ptr_pkt-&gt;pkt_seq=i;</span><br><span class="line">        ptr_pkt-&gt;pkt_len=pkt_len;</span><br><span class="line">        send_window.right++;<span class="comment">//滑动窗口</span></span><br><span class="line">        pkt_to_send++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>​	这里需要注意的是，由于初始化时<code>send_window.left=send_window.left</code>，而且最后结束时仍以<code>send_window.left==send_window.left</code>为判断条件，因此不能将窗口每次都整体滑动，而是应该在满足窗口长度小于最大窗口长度的前提下根据需要分别滑动窗口左右边界。</p>
+<p>​  这里需要注意的是，由于初始化时<code>send_window.left=send_window.left</code>，而且最后结束时仍以<code>send_window.left==send_window.left</code>为判断条件，因此不能将窗口每次都整体滑动，而是应该在满足窗口长度小于最大窗口长度的前提下根据需要分别滑动窗口左右边界。</p>
+<h2 id="三、选择重传协议"><a class="header-anchor" href="#三、选择重传协议">¶</a>三、选择重传协议</h2>
+<p>  在选择重传协议中，发送窗口和接收窗口大小均大于1，在这个协议中，发送方只需要针对超时或出错的那些包进行重传，接收方在接收到窗口内序号的数据包后都会将其储存起来，并且在正确接收到最左边的数据包后，会整体将窗口右移一位。</p>
+<p>  在某些情况下（如书上数据链路层的选择重传协议），接收方会在接收到一个窗口内所有数据包后才将它们整体递交给上层，然后将窗口整体右移窗口长度。</p>
+<p>  由于只需要重传部分数据包，选择重传协议的效率是比较高的。</p>
 <h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结</h2>
 <ul>
 <li>
@@ -63,12 +71,13 @@
 <li>
 <p>我的收获与总结</p>
 <ol>
-<li>学习了RDT协议的相关知识，进行了RDT通信程序的设计，了解了传输层的滑动窗口协议。</li>
-<li>对socket中的函数有了更深的理解，学习利用多线程进行通信。</li>
+<li>学习到了在传输层也有滑动窗口协议，并且与数据链路层的基本相同。至于为什么要有两个滑动窗口协议，网络上给出的解释是：由于数据链路层只能保证每一条链路上的数据传输可靠性，但在这之中路由器意外丢包等情况是它无法控制的，由此需要在传输层再加一层滑动窗口协议来保证整个传输过程的可靠性。</li>
+<li><strong>注意到这次的gobackN代码中使用了多线程的编程方式。这本质上是与实验一使用fork（）的多进程编程是有区别的。多线程均属于一个进程</strong>，用通俗的话来说它们都是在同一个CPU上运行，只是子线程在利用主进程的阻塞时间进行工作，从而提高CPU的效率，从这个方面，多线程可以看成对于一个CPU的时分复用。比如当主线程在等待服务器回应、将数据传到标准输出流等待输出等过程中，CPU其实停止了工作，这时间就被分配给子线程使用。**而对于多进程，实际上是利用了多个CPU同时参与程序的运行。**因此，多进程可以真正的极大提高程序运行效率，但是也要视本机硬件情况决定，如果是单核CPU，那么多进程反倒会降低程序运行速率。另外，<strong>多线程之间共享资源比多进程之间共享资源要容易的多</strong>，这也是这次实验使用多线程编程的一个主要原因。</li>
+<li>本次实验使用了<code>poll()</code>轮询函数来查看是否有数据可读。在有许多套接字进行通信时，轮询可以很方便的管理它们的通信过程。不过实际上，由于进行通信的套接字只有一个，用轮询有些大材小用。如果不是因为学习函数的需要，<b>实际上我们可以使用非阻塞的<code>recv()</code>实现同样的功能。</b>我们知道在非阻塞情况下，<code>recv()</code>成功接收将会返回接收数据长度，而没有数据接收时也会立即以“-1”返回，并且会将系统内全局变量<code>errno</code>的值置为<code>EWOULDBLOCK</code>，那么我们只需要检查函数返回值和<code>errno</code>的值就可以知道是否接收到了新的数据包。</li>
 <li>
 <ul>
 <li>本次实验可以很直观的看到回退N协议与停等协议在有噪信道上的效率。在两张实验记录图中记录下了两个协议传输同样大小的文件所用时间：约2.43秒（停-等协议）和约10.93秒（回退N）协议，这说明由于回退N协议在丢包率较高时需要大量重传已经发送成功的数据，其实际上的运行效率甚至不如停-等协议。</li>
-<li>我注意到回退N协议输出了大量的内容，为了排除<code>printf()</code>函数带来的影响，我去掉了除显示发送时间外的所有输出语句，得到如下结果：约2.40秒（停-等协议）和约8.86秒（回退N）协议，说明此时回退N效率确实不如停-等协议。</li>
+<li>注意到回退N协议输出了大量的内容，为了排除<code>printf()</code>函数带来的影响，我去掉了除显示发送时间外的所有输出语句，得到如下结果：约2.40秒（停-等协议）和约8.86秒（回退N）协议，说明此时回退N效率确实不如停-等协议。</li>
 <li>再来看看丢包率为0的情况：约0.29秒（停-等协议）和约0.0244秒（回退N）协议，这时就能很直观的体会到回退N协议的高效了。</li>
 </ul>
 </li>
@@ -88,56 +97,70 @@
   <entry>
     <title>计算机网络 第二次实验</title>
     <url>/2021/11/11/second-exp-CN/</url>
-    <content><![CDATA[<h1 id="第二次实验-TCP-UDP通信程序设计"><a href="#第二次实验-TCP-UDP通信程序设计" class="headerlink" title="第二次实验 TCP/UDP通信程序设计"></a>第二次实验 TCP/UDP通信程序设计</h1><h2 id="一、TCP通信"><a href="#一、TCP通信" class="headerlink" title="一、TCP通信"></a>一、TCP通信</h2><ul>
-<li><p>客户端</p>
-<p>&emsp;&emsp;为了持续输入要发送的数据，同时接收服务器回射的文本信息，将原代码中发送数据部分修改如下:</p>
+    <content><![CDATA[<h1>第二次实验 TCP/UDP通信程序设计</h1>
+<h2 id="一、TCP通信"><a class="header-anchor" href="#一、TCP通信">¶</a>一、TCP通信</h2>
+<ul>
+<li>
+<p>客户端</p>
+<p>  为了持续输入要发送的数据，同时接收服务器回射的文本信息，将原代码中发送数据部分修改如下:</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 发送数据 */</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    	<span class="keyword">char</span> msg[<span class="number">50000</span>]=<span class="string">&quot;&quot;</span>;</span><br><span class="line">    	gets(msg);<span class="comment">//读取要发送的信息</span></span><br><span class="line">    	<span class="keyword">if</span>(<span class="built_in">strlen</span>(msg)&lt;=<span class="number">0</span>) <span class="keyword">break</span>;<span class="comment">//只键入回车（空白输入）时退出</span></span><br><span class="line">    	Send(sockfd, msg, <span class="built_in">strlen</span>(msg), <span class="number">0</span>);</span><br><span class="line">    	<span class="keyword">char</span> buf[TCP_BUF_LENGTH]=<span class="string">&quot;&quot;</span>;</span><br><span class="line">    	Recv(sockfd,buf,TCP_BUF_LENGTH,<span class="number">0</span>);<span class="comment">//接收回射数据</span></span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,buf);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;同时，原代码在运行程序时必须先运行ts再运行tc，否则客户端Connect失败后就会直接退出。因此，修改连接部分如下：</p>
+<p>  同时，原代码在运行程序时必须先运行ts再运行tc，否则客户端Connect失败后就会直接退出。因此，修改连接部分如下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span>(connect(sockfd, (struct sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(struct sockaddr))==<span class="number">-1</span>);</span><br><span class="line"><span class="comment">//这里可以执行个sleep函数避免过于频繁的执行连接操作占用内存，不过实验中影响不大</span></span><br></pre></td></tr></table></figure>
 </li>
-<li><p>服务器端</p>
-<p>&emsp;&emsp;服务器端只需要让其持续运行下去不断接收信息，再增加一个将信息回射的操作即可，因此只需修改接收数据部分：</p>
+<li>
+<p>服务器端</p>
+<p>  服务器端只需要让其持续运行下去不断接收信息，再增加一个将信息回射的操作即可，因此只需修改接收数据部分：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 接收数据 */</span></span><br><span class="line">    <span class="keyword">char</span> buf[TCP_BUF_LENGTH];</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">size_t</span> pkt_len = Recv(client_sockfd, buf, TCP_BUF_LENGTH, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pkt_len &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        buf[pkt_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Message received: [%zu bytes]\n&quot;</span>,pkt_len);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Connection closed\n&quot;</span>);</span><br><span class="line">        <span class="keyword">break</span>;<span class="comment">//接收到空信息时退出</span></span><br><span class="line">    &#125;</span><br><span class="line">    Send(client_sockfd,buf,<span class="built_in">strlen</span>(buf),<span class="number">0</span>);<span class="comment">//回射信息，目标应该是client的套接字</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;最后发送和接收生成的随机代码，获得的结果如下图所示<img src="tcp.png" alt=""><br>​&emsp;&emsp;可以看到两个文件的md5加密是相同的，即程序确实完成了回射和接收回射功能。</p>
+<p>  最后发送和接收生成的随机代码，获得的结果如下图所示<img src="tcp.png" alt=""><br>
+​  可以看到两个文件的md5加密是相同的，即程序确实完成了回射和接收回射功能。</p>
 </li>
 </ul>
-<h2 id="二、UDP通信"><a href="#二、UDP通信" class="headerlink" title="二、UDP通信"></a>二、UDP通信</h2><ul>
-<li><p>客户端</p>
-<p>&emsp;&emsp;根据要求，需要改成用Connect和Send替换Sendto，同时通过循环创建10个套接字给服务器发送信息</p>
+<h2 id="二、UDP通信"><a class="header-anchor" href="#二、UDP通信">¶</a>二、UDP通信</h2>
+<ul>
+<li>
+<p>客户端</p>
+<p>  根据要求，需要改成用Connect和Send替换Sendto，同时通过循环创建10个套接字给服务器发送信息</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 发送数据 */</span></span><br><span class="line"><span class="keyword">for</span>(;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">    sockfd = Socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);<span class="comment">//创建套接字</span></span><br><span class="line">    Connect(sockfd, (struct sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(struct sockaddr));</span><br><span class="line">    <span class="keyword">char</span> *msg = <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">    <span class="comment">//printf(&quot;Send message: %s[%zu bytes]\n&quot;, msg, strlen(msg));</span></span><br><span class="line">    Send(sockfd, msg, <span class="built_in">strlen</span>(msg), <span class="number">0</span>);</span><br><span class="line">    close(sockfd);<span class="comment">//因为只用发一次，所以每次用完就要关掉</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>服务器端</p>
-<p>&emsp;&emsp;根据要求，服务器端需要将客户端的ip地址与端口号显示出来，因此修改接收数据处代码如下：</p>
+<li>
+<p>服务器端</p>
+<p>  根据要求，服务器端需要将客户端的ip地址与端口号显示出来，因此修改接收数据处代码如下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 接收数据 */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">client_addr</span>;</span></span><br><span class="line">    <span class="keyword">int</span> client_addr_len = <span class="keyword">sizeof</span>(client_addr);</span><br><span class="line">    <span class="keyword">for</span>(;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">    <span class="keyword">char</span> buf[UDP_BUF_LENGTH];</span><br><span class="line">    <span class="keyword">size_t</span> pkt_len = Recvfrom(sockfd, buf, UDP_BUF_LENGTH, <span class="number">0</span>, (struct sockaddr *)&amp;client_addr, &amp;client_addr_len);</span><br><span class="line">    buf[pkt_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    <span class="comment">//printf(&quot;Message received: %s[%zu bytes]\n&quot;, buf, pkt_len);</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Received from %s:%d\n&quot;</span>,inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));<span class="comment">//ip和端口号</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;这里用到了两个辅助函数：<code>inet_ntoa</code>和<code>ntohs</code>，其中前者是用来将类型为<code>inet_addr</code>类型的网络二进制地址转换为用’.’进行分割的常见ip地址形式。由于接收到的端口号是用<code>htons</code>转换为网络字节的，所以要想显示我们还需要用<code>ntohs</code>将其转换回来。</p>
-<p>&emsp;&emsp;最后程序运行效果如下：<img src="udp.png" alt=""><br>​&emsp;&emsp;可以看到每次返回的ip都是我们配置的ip地址，而端口不同，这是因为我们没有对发送方的套接字进行bind操作，端口均是随机分配的。</p>
+<p>  这里用到了两个辅助函数：<code>inet_ntoa</code>和<code>ntohs</code>，其中前者是用来将类型为<code>inet_addr</code>类型的网络二进制地址转换为用’.'进行分割的常见ip地址形式。由于接收到的端口号是用<code>htons</code>转换为网络字节的，所以要想显示我们还需要用<code>ntohs</code>将其转换回来。</p>
+<p>  最后程序运行效果如下：<img src="udp.png" alt=""><br>
+​  可以看到每次返回的ip都是我们配置的ip地址，而端口不同，这是因为我们没有对发送方的套接字进行bind操作，端口均是随机分配的。</p>
 </li>
 </ul>
-<h2 id="三、TCP实时通信程序"><a href="#三、TCP实时通信程序" class="headerlink" title="三、TCP实时通信程序"></a>三、TCP实时通信程序</h2><p>&emsp;&emsp;fork函数可以创建一个子进程，与父进程同时执行，子进程和父进程通过<code>fork()</code>的返回值区分，父进程的<code>fork()</code>返回子函数的fpid（从1依序递增），而子进程的<code>fork()</code>返回0。如果我们设定两个进程一个接收一个发送，就可以完成终端的实时通信。具体实现思路如下：</p>
+<h2 id="三、TCP实时通信程序"><a class="header-anchor" href="#三、TCP实时通信程序">¶</a>三、TCP实时通信程序</h2>
+<p>  fork函数可以创建一个子进程，与父进程同时执行，子进程和父进程通过<code>fork()</code>的返回值区分，父进程的<code>fork()</code>返回子函数的fpid（从1依序递增），而子进程的<code>fork()</code>返回0。如果我们设定两个进程一个接收一个发送，就可以完成终端的实时通信。具体实现思路如下：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*tcp实时通信*/</span></span><br><span class="line"><span class="keyword">pid_t</span> fpid=fork();<span class="comment">//创建子进程</span></span><br><span class="line"><span class="keyword">if</span>(fpid&lt;<span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">&quot;error in fork!&quot;</span>);</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (fpid!=<span class="number">0</span>)&#123;<span class="comment">//父进程</span></span><br><span class="line">    <span class="comment">/* tcp客户端 */</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//子进程</span></span><br><span class="line">    <span class="comment">/*tcp服务器端*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;这里tcp客户端与tcp服务器端与前面的TCP通信程序基本相同，不过可以删除掉服务器回射以及客户端接收回射的部分，再在服务器端部分整理一下该print的部分即可。</p>
-<p>&emsp;&emsp;但是还有一个显然的问题，<strong>我们需要两个服务器运行在不同的端口上</strong>，因此在net.h中添加以下代码：</p>
+<p>  这里tcp客户端与tcp服务器端与前面的TCP通信程序基本相同，不过可以删除掉服务器回射以及客户端接收回射的部分，再在服务器端部分整理一下该print的部分即可。</p>
+<p>  但是还有一个显然的问题，<strong>我们需要两个服务器运行在不同的端口上</strong>，因此在net.h中添加以下代码：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TCP_SERVER_PORT1 8003 <span class="comment">//8002被UDP占用了</span></span></span><br></pre></td></tr></table></figure>
-<p>&emsp;&emsp;接下来，我们将上面的实时通信代码配置两份，并交叉设置其端口：</p>
+<p>  接下来，我们将上面的实时通信代码配置两份，并交叉设置其端口：</p>
 <ul>
-<li>代码1<ul>
+<li>代码1
+<ul>
 <li>客户端 ：目标为TCP_SERVER_PORT</li>
 <li>服务器端：服务器端口为TCP_SERVER_PORT1</li>
 </ul>
 </li>
-<li>代码2<ul>
+<li>代码2
+<ul>
 <li>客户端 ：目标为TCP_SERVER_PORT1</li>
 <li>服务器端：服务器端口为TCP_SERVER_PORT</li>
 </ul>
 </li>
 </ul>
-<p>&emsp;&emsp;此时运行这两份代码，就可以实现实时通信。如下图所示</p>
+<p>  此时运行这两份代码，就可以实现实时通信。如下图所示</p>
 <p><img src="tcp_duel.png" alt=""></p>
-<p>&emsp;&emsp;注意，<strong>由于此时发送与接收同时开始运行，因此发送端的<code>connect</code>函数的重试是不可缺少的</strong></p>
-<p>&emsp;&emsp;另外一个值得注意的地方是<strong>子进程与父进程分别负责什么部分，结果是不同的</strong>。最终的代码中由<strong>父进程负责发，子进程负责收</strong>，那么当A方发送完毕，A的发送进程和B的接收进程同时结束，因为接收是子进程，因此终端此时不会接管输入框，B的发送还可以继续，而A方的接收进程此时也还在运行，则B-&gt;A的通信还是可以继续。</p>
-<p>&emsp;&emsp;但是如果<strong>父进程负责收，子进程负责发</strong>，那么当A方发送完毕，B方的接收进程（父进程）结束，B的输入框将会被交还给终端，因此无法再继续实现B-&gt;A的通信，此时只能ctrl+c强行终止A的接收程序。如下图所示<img src="tcp_duel_error.png" alt=""></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><p><strong>思考题1：</strong></p>
+<p>  注意，<strong>由于此时发送与接收同时开始运行，因此发送端的<code>connect</code>函数的重试是不可缺少的</strong></p>
+<p>  另外一个值得注意的地方是<strong>子进程与父进程分别负责什么部分，结果是不同的</strong>。最终的代码中由<strong>父进程负责发，子进程负责收</strong>，那么当A方发送完毕，A的发送进程和B的接收进程同时结束，因为接收是子进程，因此终端此时不会接管输入框，B的发送还可以继续，而A方的接收进程此时也还在运行，则B-&gt;A的通信还是可以继续。</p>
+<p>  但是如果<strong>父进程负责收，子进程负责发</strong>，那么当A方发送完毕，B方的接收进程（父进程）结束，B的输入框将会被交还给终端，因此无法再继续实现B-&gt;A的通信，此时只能ctrl+c强行终止A的接收程序。如下图所示<img src="tcp_duel_error.png" alt=""></p>
+<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结</h2>
+<ul>
+<li>
+<p><strong>思考题1：</strong></p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">    <span class="keyword">short</span>   sin_family;</span><br><span class="line">    u_short sin_port;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span>  <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span></span><br><span class="line">    <span class="keyword">char</span>    sin_zero[<span class="number">8</span>];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*以下是一个实例*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">server_addr</span> =</span> &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    server_addr.sin_family = AF_INET;<span class="comment">//IPv4协议</span></span><br><span class="line">    server_addr.sin_addr.s_addr = inet_addr(<span class="string">&quot;127.0.0.1&quot;</span>);<span class="comment">//IP地址</span></span><br><span class="line">    server_addr.sin_port = htons(<span class="number">8001</span>);<span class="comment">//端口为8001</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li>这里的sin是sockaddr_in的缩写</li>
@@ -147,48 +170,59 @@
 <li><code>sin_zero</code>用作占位，使<code>sockaddr_in</code>的长度与<code>sockaddr</code>相同。我们可以计算一下：<code>sockaddr</code>的长度为$2+14=16$Byte，而<code>sockaddr_in</code>除去占位时长度为$2+2+\frac{32}{8}=8$Byte，因此sin_zero恰好为$8$Byte。</li>
 </ul>
 </li>
-<li><p><strong>思考题2：</strong></p>
+<li>
+<p><strong>思考题2：</strong></p>
 <ol>
 <li>非连接的客户端在建立socket时直接创建一个套接字，指定其协议族、类型、传输协议即可。</li>
 <li>面向连接的客户端在同样建立socket以后还需要先使用<code>connect()</code>函数与服务器端建立连接后才可以进行数据的收发。</li>
 </ol>
 </li>
-<li><p><strong>思考题3：</strong></p>
+<li>
+<p><strong>思考题3：</strong></p>
 <ol>
 <li>非连接的客户端在收发数据之前不需要建立连接，并且需要使用<code>sendto()</code>函数和<code>recvfrom()</code>函数发送、接收信息，前者需要带上目的地址，而后者会返回发送方地址。</li>
 <li>面向连接的客户端在收发数据之前需要先建立连接，并且只需要使用<code>send()</code>和<code>recv()</code>函数收发信息。</li>
 </ol>
 </li>
-<li><p><strong>思考题4：</strong></p>
+<li>
+<p><strong>思考题4：</strong></p>
 <ul>
 <li>面向连接的通信的<strong>优点是稳定和可靠性</strong>。它能保证数据的稳定、有序传输，还能在一定程度上进行拥塞控制。它的<strong>缺点是占用资源较多</strong>（如在服务器端需要为每个客户分配对应的响应套接字）、<strong>建立连接需要时间</strong>。它适合工作在传输数据量较大、追求稳定通信或者噪音特别大的场合。如精密传感器等与主机的通信、文件的下载等。</li>
 <li>无连接通信的<strong>优点是传输速度快</strong>。它不需要提前建立连接，不需要接收方的确认，因而可以用更大的速度传输数据。它的<strong>缺点是传输数据不稳定、无反馈</strong>，对于数据丢包、乱序等情况完全无法处理。它适合工作在实时通信、短时间、小数据量的通信情况。如视频聊天、网络电话，以及对服务器的一些小数据量的请求（如DNS）等。</li>
 </ul>
 </li>
-<li><p><strong>思考题5：</strong></p>
-<p>&emsp;&emsp;实验中使用socket工作在阻塞方式。<strong>阻塞方式与非阻塞方式的不同在于它们对于一些函数的响应方式不同。</strong>这些函数主要有<code>send(),recv(),sendto(),recvfrom(),accept()</code>。对于工作在阻塞方式的socket，调用这些函数时将会阻塞在原地直到任务完成或者有错误发生。例如，<code>accept()</code>函数在阻塞时会一直等到有客户连接才继续下面的程序，而非阻塞时只接收被调用时存在的客户连接，若没有则立刻执行下面的程序。<code>recv()</code>函数在阻塞时会一直等到收到消息，而在非阻塞时若无消息则立即返回。</p>
+<li>
+<p><strong>思考题5：</strong></p>
+<p>  实验中使用socket工作在阻塞方式。**阻塞方式与非阻塞方式的不同在于它们对于一些函数的响应方式不同。**这些函数主要有<code>send(),recv(),sendto(),recvfrom(),accept()</code>。对于工作在阻塞方式的socket，调用这些函数时将会阻塞在原地直到任务完成或者有错误发生。例如，<code>accept()</code>函数在阻塞时会一直等到有客户连接才继续下面的程序，而非阻塞时只接收被调用时存在的客户连接，若没有则立刻执行下面的程序。<code>recv()</code>函数在阻塞时会一直等到收到消息，而在非阻塞时若无消息则立即返回。</p>
 </li>
-<li><p><strong>我的收获与总结</strong>：</p>
+<li>
+<p><strong>我的收获与总结</strong>：</p>
 <ol>
 <li>这次实验完成了TCP和UDP通信的过程，使我对TCP、UDP协议、套接字和它们的程序实现有了更深的印象。同时，也学习了用linux编译C语言代码的方法，以及使用makefile进行批量重复的操作。最后，学习了linux操作系统unistd.h头文件里的fork()实现多进程编程的方法。</li>
 </ol>
 <blockquote>
 <p>下面两个补充是基于思考题和平常以及实验过程中所见到的现象进行的进一步探究。</p>
 </blockquote>
-<ol>
-<li><p><strong>对思考题3的一些补充：</strong>实验中的UDP要求使用connect实现，但是<u>实际上此时的UDP仍然是一个无连接的服务！</u><code>connect()</code>函数的作用是为套接字设定了目的地址，但是并未与服务器建立连接，也就是说，<strong>无论服务器端口有没有被监听，甚至有没有开启，<code>connect(),send()</code>函数都会正常的执行下去。</strong>如果我们实验中先开启客户端，会发现客户端在服务器还未打开时就显示发送完毕，而服务器端显然收不到数据。</p>
+<ol start="2">
+<li>
+<p>**对思考题3的一些补充：**实验中的UDP要求使用connect实现，但是<u>实际上此时的UDP仍然是一个无连接的服务！</u><code>connect()</code>函数的作用是为套接字设定了目的地址，但是并未与服务器建立连接，也就是说，**无论服务器端口有没有被监听，甚至有没有开启，<code>connect(),send()</code>函数都会正常的执行下去。**如果我们实验中先开启客户端，会发现客户端在服务器还未打开时就显示发送完毕，而服务器端显然收不到数据。</p>
 </li>
-<li><p><strong>对思考题5的一些补充：</strong></p>
+<li>
+<p><strong>对思考题5的一些补充：</strong></p>
 </li>
 </ol>
 <ul>
-<li><p>网上的资料说<code>connect()</code>函数也会阻塞，但是经过测试发现，<strong>实验中的连接函数并不会阻塞</strong>，它在连接失败时会立即返回-1，并不会等待到连接的建立。</p>
+<li>
+<p>网上的资料说<code>connect()</code>函数也会阻塞，但是经过测试发现，<strong>实验中的连接函数并不会阻塞</strong>，它在连接失败时会立即返回-1，并不会等待到连接的建立。</p>
 </li>
-<li><p>对于<code>send()</code>和<code>sendto()</code>函数的阻塞可能不是很好理解，就像上面所说，服务器未打开时<code>sendto()</code>也可以正常运行，这是因为<strong>这两个函数如同其他一些通信(例如单片机的串口通信)一样，功能仅仅是将信息送到发送区的缓冲栈中，而发送操作由系统自己完成。</strong>因此它阻塞的条件是发送区的缓冲栈是否已满。<u>因此当它们返回时，信息不一定已经被目标接收，甚至不一定已经发送出去了。</u></p>
+<li>
+<p>对于<code>send()</code>和<code>sendto()</code>函数的阻塞可能不是很好理解，就像上面所说，服务器未打开时<code>sendto()</code>也可以正常运行，这是因为**这两个函数如同其他一些通信(例如单片机的串口通信)一样，功能仅仅是将信息送到发送区的缓冲栈中，而发送操作由系统自己完成。**因此它阻塞的条件是发送区的缓冲栈是否已满。<u>因此当它们返回时，信息不一定已经被目标接收，甚至不一定已经发送出去了。</u></p>
 </li>
-<li><p>那么TCP怎么实现它的确认功能呢，毕竟数据还没被确认函数就已经返回了？这都交给系统内部自己完成。由于要发送的数据已经保存在缓冲区中，因此它可以在超时后重传，直到收到确认后再将数据删除，腾出缓冲区的空间来。也就是说，<strong>我们所调用的<code>send()</code>函数其实与真正的发送过程还隔了一层</strong>。</p>
+<li>
+<p>那么TCP怎么实现它的确认功能呢，毕竟数据还没被确认函数就已经返回了？这都交给系统内部自己完成。由于要发送的数据已经保存在缓冲区中，因此它可以在超时后重传，直到收到确认后再将数据删除，腾出缓冲区的空间来。也就是说，<strong>我们所调用的<code>send()</code>函数其实与真正的发送过程还隔了一层</strong>。</p>
 </li>
-<li><p>对于除了C以外的某些语言，阻塞与非阻塞还有其他的区别。例如在python中写tcp通信时</p>
+<li>
+<p>对于除了C以外的某些语言，阻塞与非阻塞还有其他的区别。例如在python中写tcp通信时</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">buf=socket.recv(<span class="number">1024</span>).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br></pre></td></tr></table></figure>
 <p><strong>若配置在阻塞状态，那么它在收到数据之前不会以任何形式被阻止，除非整个程序被强制关闭</strong>，包括ctrl+c的强制停止都无法退出该函数。这对于调试过程是十分不便的，因此需要配置成非阻塞状态以保证有手段将其退出。</p>
 </li>
@@ -208,8 +242,11 @@
   <entry>
     <title>计算机网络 第一次实验</title>
     <url>/2021/11/03/first_exp_CN/</url>
-    <content><![CDATA[<h1 id="第一次实验-IP组网"><a href="#第一次实验-IP组网" class="headerlink" title="第一次实验 IP组网"></a>第一次实验 IP组网</h1><h2 id="第一个小实验-linux下常用网络指令"><a href="#第一个小实验-linux下常用网络指令" class="headerlink" title="第一个小实验 linux下常用网络指令"></a>第一个小实验 linux下常用网络指令</h2><ol>
-<li><p>ip address命令的结果</p>
+    <content><![CDATA[<h1>第一次实验 IP组网</h1>
+<h2 id="第一个小实验-linux下常用网络指令"><a class="header-anchor" href="#第一个小实验-linux下常用网络指令">¶</a>第一个小实验 linux下常用网络指令</h2>
+<ol>
+<li>
+<p>ip address命令的结果</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</span><br><span class="line">    link/ether 00:0c:29:ac:2e:54 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.226.129/24 brd 192.168.226.255 scope global dynamic noprefixroute ens33</span><br><span class="line">       valid_lft 1417sec preferred_lft 1417sec</span><br><span class="line">    inet6 fe80::ba7:70e3:22ed:d2cf/64 scope link noprefixroute </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
 <p>图中的信息告诉我们，该虚拟机有两个接口，分别是环回(lo)和网络。环回接口是计算机内部使用的一个虚拟接口，它的数据包始终不会离开主机，经常用于测试。网络接口中，ens33是网卡的名称。实际上，在接口名称后面&lt;&gt;包裹的文字里已经注明了接口的作用和状态。环回、广播和多播很容易看出，而UP代表着“网络接口已启用”，LOWER_UP则代表着“网络电缆已插入，设备已连接至网络”。</p>
 <p>其后的参数中，mtu表示最大传输单位，qdisc表示数据包排队方式，state是网络接口状态，group是接口组设置，qlen代表了传输队列长度。</p>
@@ -217,7 +254,8 @@
 <p>接下来inet和inet6部分。inet代表了ipv4地址，而inet6代表ipv6地址。由此我们可以看出，本机的ipv4地址为：192.168.226.129，ipv6地址为：fe80::ba7:70e3:22ed:d2cf。scope global/link分别代表全局/仅本设备有效。noprefixroute则表示无前缀路由。valid_lft 与preferred_lft分别代表地址的有效使用期限和首选生存期。</p>
 <p>对于ip地址的”/“后的数字，代表了其子网掩码用二进制表示时为“1”的位数（由高到低），如192.168.226.129/24就代表了子网掩码为255.255.255.0。</p>
 </li>
-<li><p>在windows cmd中输入ipconfig得到VMnet8的网络地址:192.168.226.1<img src="ipconfig.jpg" alt="">同时在虚拟机中先执行<code>ip neigh flush all</code>命令后<code>ip neigh</code>的执行结果如下:</p>
+<li>
+<p>在windows cmd中输入ipconfig得到VMnet8的网络地址:192.168.226.1<img src="ipconfig.jpg" alt="">同时在虚拟机中先执行<code>ip neigh flush all</code>命令后<code>ip neigh</code>的执行结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">192.168.226.2 dev ens33 lladdr 00:50:56:ec:af:bf REACHABLE</span><br></pre></td></tr></table></figure>
 <p><code>ip neigh</code>用于显示arp缓存表单，用于将ip地址转换为MAC地址。我们看到有一条表项，这里的REACHABLE代表该表项目前仍有效，与此对应的还有STALE（表项过期）等。</p>
 <p>下面对192.168.226.1 ping 4次以后，得到的输出结果如下:</p>
@@ -227,25 +265,30 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">192.168.226.2 dev ens33 lladdr 00:50:56:ec:af:bf REACHABLE</span><br><span class="line">192.168.226.1 dev ens33 lladdr 00:50:56:c0:00:08 REACHABLE</span><br></pre></td></tr></table></figure>
 <p>可以看到输出结果增加了我们ping的ip地址，由此我们得到了对方机器的MAC地址:00:50:56:c0:00:08。</p>
 </li>
-<li><p>用<code>ip route</code>命令查看本机的IPV4路由表如下：</p>
+<li>
+<p>用<code>ip route</code>命令查看本机的IPV4路由表如下：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">default via 192.168.226.2 dev ens33 proto dhcp metric 100 </span><br><span class="line">169.254.0.0/16 dev ens33 scope link metric 1000 </span><br><span class="line">192.168.226.0/24 dev ens33 proto kernel scope link src 192.168.226.129 metric 100 </span><br></pre></td></tr></table></figure>
 <p>路由表中有三条，第一条很明显表明了默认网关是192.168.226.2，并采用DHCP协议动态分配IP。metric指出了该路由的跃点，即由源发往目的所经过的路由器数。</p>
 <p>第三条是我们自己所在的网络，这里我们可以看出<strong>子网掩码为255.255.255.0</strong>，与前面<code>ip address</code>命令所得一致。这里的<code>src</code>代表源IP地址，即通过这条路由发包时外界所看到的ip地址，这也与前面<code>ip address</code>命令中得到的主机ipv4地址一致。</p>
 <p>对于第二条，CSDN上的描述是，当DHCP协议失败时，主机将自动在169.254.x.x中选择一个地址分配，使得连接能继续下去。所以我个人认为，它应该是一条备用路由。</p>
 </li>
-<li><p><code>sysctl net.ipv4.ip_forward</code>命令输出结果如下:</p>
+<li>
+<p><code>sysctl net.ipv4.ip_forward</code>命令输出结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">net.ipv4.ip_forward = 0</span><br></pre></td></tr></table></figure>
 <p>对此的解释在<a href="#forward">思考题1</a>中。</p>
 </li>
-<li><p><code>sudo traceroute --icmp 202.38.64.1</code>命令输出结果如下:</p>
+<li>
+<p><code>sudo traceroute --icmp 202.38.64.1</code>命令输出结果如下:</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">traceroute to 202.38.64.1 (202.38.64.1), 30 hops max, 60 byte packets</span><br><span class="line"> 1  _gateway (192.168.226.2)  0.719 ms  0.672 ms  0.654 ms</span><br><span class="line"> 2  192.168.133.254 (192.168.133.254)  3.684 ms  3.791 ms  4.200 ms</span><br><span class="line"> 3  172.16.0.1 (172.16.0.1)  1.498 ms  1.696 ms  1.676 ms</span><br><span class="line"> 4  202.38.88.94 (202.38.88.94)  1.074 ms  1.016 ms  1.294 ms</span><br><span class="line"> 5  202.38.96.60 (202.38.96.60)  1.147 ms  1.211 ms  1.357 ms</span><br><span class="line"> 6  ns.ustc.edu.cn (202.38.64.1)  0.645 ms  0.751 ms  0.587 ms</span><br></pre></td></tr></table></figure>
 <p>可以看到，发送的3个包都成功到达，包括网关在内，一共经过了5个路由器。</p>
 </li>
 </ol>
-<h2 id="第二个小实验-Cisco路由器IP组网模拟"><a href="#第二个小实验-Cisco路由器IP组网模拟" class="headerlink" title="第二个小实验 Cisco路由器IP组网模拟"></a>第二个小实验 Cisco路由器IP组网模拟</h2><p>按照实验要求搭建网络如下:<img src="packettracer.png" alt=""></p>
+<h2 id="第二个小实验-Cisco路由器IP组网模拟"><a class="header-anchor" href="#第二个小实验-Cisco路由器IP组网模拟">¶</a>第二个小实验 Cisco路由器IP组网模拟</h2>
+<p>按照实验要求搭建网络如下:<img src="packettracer.png" alt=""></p>
 <p>其中，各计算机配置的默认网关均为对应连接的路由器接口的ip地址，如PC2的网关配置为192.168.2.1(Router1与Switch1连接的接口的地址)。</p>
 <ul>
-<li><p>静态ip路由:</p>
+<li>
+<p>静态ip路由:</p>
 <p>经过对配置参考的分析，目的网络应该配置需要经过路由器才能到达的网络，而网关则应该配置与本路由器相连的那个路由器对应接口的ip地址。</p>
 <p>各路由器的静态路由配置命令如下:</p>
 <p><strong>Router0</strong></p>
@@ -268,7 +311,8 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">C:\&gt;ping 192.168.2.101</span><br><span class="line"></span><br><span class="line">Pinging 192.168.2.101 with 32 bytes of data:</span><br><span class="line"></span><br><span class="line">Request timed out.</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line"></span><br><span class="line">Ping statistics for 192.168.2.101:</span><br><span class="line">    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),</span><br><span class="line">Approximate round trip times in milli-seconds:</span><br><span class="line">    Minimum = 0ms, Maximum = 0ms, Average = 0ms</span><br><span class="line"></span><br><span class="line">C:\&gt;ping 192.168.2.101</span><br><span class="line"></span><br><span class="line">Pinging 192.168.2.101 with 32 bytes of data:</span><br><span class="line"></span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time=4ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line">Reply from 192.168.2.101: bytes=32 time&lt;1ms TTL=126</span><br><span class="line"></span><br><span class="line">Ping statistics for 192.168.2.101:</span><br><span class="line">    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),</span><br><span class="line">Approximate round trip times in milli-seconds:</span><br><span class="line">    Minimum = 0ms, Maximum = 4ms, Average = 1ms</span><br></pre></td></tr></table></figure>
 <p>可以发现，一开始的时候ping不通，但是ping通以后就不会再出现超时的情况。并且经过的路由器越多，ping不通的次数就越多。</p>
 </li>
-<li><p>动态ip路由</p>
+<li>
+<p>动态ip路由</p>
 <p>根据配置参考所知，只需要把与路由器直连的子网放入RIP信息库即可，如对于Router0，就只用放入192.168.1.0和192.168.10.0</p>
 <p>各路由器的动态路由配置命令如下:</p>
 <p><strong>Router0</strong></p>
@@ -293,11 +337,13 @@
 <p>结合上网搜集资料和书P359~361页的内容，我们大概可以了解到，Ping的丢包大概是因为主机和路由器都首先需要获得目的机器的MAC地址，因此需要先发送ARP解析来获取MAC地址。当获取到MAC地址后，由于解析时间较长，已经被判定为超时。而每次超时后，主机会延长超时判断的时间，因此最后目的MAC地址可以正常返回，数据得以正常传输。我们大概可以推断，路由器越多，需要经过的ARP解析花费的时间就越多，超时的次数也就越多。利用Packet Tracer的Simulation功能，我们也可以进一步验证这一点。在Simulation中，确实出现了Ping超时的时候，“主机与路由器的通信不止一次”这种现象。</p>
 </li>
 </ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<h2 id="总结"><a class="header-anchor" href="#总结">¶</a>总结</h2>
+<ul>
 <li><span id="forward"><strong>思考题1：</strong></span>net.ipv4.ip_forward配置决定了<strong>是否允许数据包转发</strong>。在前面的实验中，配置结果是0，表示禁止数据包转发。在内网主机与外网主机通信时，由于内网ip不能直接出现在Internet上，当内网向外网发送时，首先会经过网关使用NAT（网络地址转换），然后发给外网主机，外网主机返回的信息也只能发给网关，目的ip地址为网关地址，此时网关所做的将目的地址更改为内网主机ip地址，并发送数据包的过程就叫做数据包转发。只有拥有多个网卡，并且有在不同网卡间交换数据的设备才有设置数据包转发的需要。由以上分析知，<strong>在网关上该配置应该为1（允许数据包转发）</strong></li>
-<li><strong>思考题2：交换机接口可以隔离冲突域，而路由器接口还可以隔离广播域。</strong>实验中当我们没有正确设置路由时，我们可以Ping通一个交换机连接的所有设备，甚至包括与交换机连接的路由器的端口，这是因为交换机（网桥）的泛洪算法会使得它在找不到目标地址时会向其除了发送方端口外的所有端口广播信息。然而路由器接口并不会将它收到的广播信息再次广播，它会严格按照路由表工作，这就达到了隔绝广播域的作用。</li>
-<li><strong>思考题3：</strong>总的来说，<strong>动态路由的使用方式更加简便</strong>，它只关心与本路由器相连的所有子网，相当于将网络划为一个个区域，每个区域之间开一个通道。但是由于没有直接的路径记录，<strong>这种路由方式的速度会慢于静态路由</strong>。<strong>静态路由的配置更加复杂</strong>，相当于把网络划分为了一条条道路，但是由于有着直接的ip地址对应，所以<strong>路由过程会更快</strong>。<strong>动态路由适用于网络节点多变、管理员对网络整体架构不清楚、网络规模较大较复杂等场合。</strong>若经常在路由器上增减网络，静态路由需要对所有路由器添加路由配置，但动态路由器只需要配置一个路由器即可。同理，如果一个网络有多个管理员，动态路由也可以使他们各司其职，只用专注于自己负责的路由器。<strong>而静态路由适用于对网络速度需求较大、结构比较固定、规模较小的场合。</strong></li>
-<li>我的收获与总结：<ol>
+<li>**思考题2：交换机接口可以隔离冲突域，而路由器接口还可以隔离广播域。**实验中当我们没有正确设置路由时，我们可以Ping通一个交换机连接的所有设备，甚至包括与交换机连接的路由器的端口，这是因为交换机（网桥）的泛洪算法会使得它在找不到目标地址时会向其除了发送方端口外的所有端口广播信息。然而路由器接口并不会将它收到的广播信息再次广播，它会严格按照路由表工作，这就达到了隔绝广播域的作用。</li>
+<li><strong>思考题3：<strong>总的来说，<strong>动态路由的使用方式更加简便</strong>，它只关心与本路由器相连的所有子网，相当于将网络划为一个个区域，每个区域之间开一个通道。但是由于没有直接的路径记录，<strong>这种路由方式的速度会慢于静态路由</strong>。<strong>静态路由的配置更加复杂</strong>，相当于把网络划分为了一条条道路，但是由于有着直接的ip地址对应，所以</strong>路由过程会更快</strong>。**动态路由适用于网络节点多变、管理员对网络整体架构不清楚、网络规模较大较复杂等场合。**若经常在路由器上增减网络，静态路由需要对所有路由器添加路由配置，但动态路由器只需要配置一个路由器即可。同理，如果一个网络有多个管理员，动态路由也可以使他们各司其职，只用专注于自己负责的路由器。<strong>而静态路由适用于对网络速度需求较大、结构比较固定、规模较小的场合。</strong></li>
+<li>我的收获与总结：
+<ol>
 <li>熟悉了linux环境的使用，以及一些常用的网络指令，以及管道、重定向等功能。</li>
 <li>对于ip组网过程、各个设备的作用有了更深刻的理解。了解了静态路由配置和动态路由配置的区别。</li>
 <li>在实验中一开始出现了各主机之间Ping不通的情况，花了很大功夫调整设置都没有成功，最后在CSDN和B站的相关资料中发现了主机默认网关配置丢失，填上默认网关以后网络正常工作。尽管这浪费了几个小时的时间，但是也逼迫我对整个组网过程进行了刨根问底的分析，获得了更加充分的了解。</li>
@@ -317,10 +363,12 @@
   </entry>
   <entry>
     <title>代码的测试</title>
-    <url>/2021/10/30/%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h3 id="C"><a href="#C" class="headerlink" title="C"></a>C</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&#x27;第%d次问候:你好!&#x27;</span>,i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y=ax^2+bx+c&quot;</span>)</span><br><span class="line">a=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input a:&quot;</span>))</span><br><span class="line">b=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input b:&quot;</span>))</span><br><span class="line">c=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input c:&quot;</span>))</span><br><span class="line">delta=b**<span class="number">2</span>-<span class="number">4</span>*a*c</span><br><span class="line"><span class="keyword">if</span> delta&gt;<span class="number">0</span>:</span><br><span class="line">    delta=delta**<span class="number">0.5</span></span><br><span class="line">    x1=(-b+delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    x2=(-b-delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;real root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f,x2=%.2f&quot;</span>%(x1,x2))</span><br><span class="line"><span class="keyword">elif</span> delta==<span class="number">0</span>:</span><br><span class="line">    x=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;same root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=x2=%.2f&quot;</span>%x)<span class="comment">#单个的不用括号</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    delta*=-<span class="number">1</span></span><br><span class="line">    delta**=<span class="number">0.5</span></span><br><span class="line">    rea=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    ima=delta</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;imaginary root!&quot;</span>)</span><br><span class="line">    <span class="comment">#print(&quot;x1=&quot;,rea,&quot;+&quot;,ima,&quot;i,x2=&quot;,rea,&quot;-&quot;,ima,&quot;i&quot;)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f+%.2fi,x2=%.2f-%.2fi&quot;</span>%(rea,ima,rea,ima))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;thank you!&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>行内的代码也可以用<code>printf(&quot;i&#39;m code&quot;)</code>来表示。</p>
+    <url>/2021/10/30/codetest/</url>
+    <content><![CDATA[<h3 id="C"><a class="header-anchor" href="#C">¶</a>C</h3>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&#x27;第%d次问候:你好!&#x27;</span>,i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Python"><a class="header-anchor" href="#Python">¶</a>Python</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;y=ax^2+bx+c&quot;</span>)</span><br><span class="line">a=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input a:&quot;</span>))</span><br><span class="line">b=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input b:&quot;</span>))</span><br><span class="line">c=<span class="built_in">eval</span>(<span class="built_in">input</span>(<span class="string">&quot;please input c:&quot;</span>))</span><br><span class="line">delta=b**<span class="number">2</span>-<span class="number">4</span>*a*c</span><br><span class="line"><span class="keyword">if</span> delta&gt;<span class="number">0</span>:</span><br><span class="line">    delta=delta**<span class="number">0.5</span></span><br><span class="line">    x1=(-b+delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    x2=(-b-delta)/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;real root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f,x2=%.2f&quot;</span>%(x1,x2))</span><br><span class="line"><span class="keyword">elif</span> delta==<span class="number">0</span>:</span><br><span class="line">    x=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;same root!&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=x2=%.2f&quot;</span>%x)<span class="comment">#单个的不用括号</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    delta*=-<span class="number">1</span></span><br><span class="line">    delta**=<span class="number">0.5</span></span><br><span class="line">    rea=-b/(<span class="number">2</span>*a*c)</span><br><span class="line">    ima=delta</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;imaginary root!&quot;</span>)</span><br><span class="line">    <span class="comment">#print(&quot;x1=&quot;,rea,&quot;+&quot;,ima,&quot;i,x2=&quot;,rea,&quot;-&quot;,ima,&quot;i&quot;)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;x1=%.2f+%.2fi,x2=%.2f-%.2fi&quot;</span>%(rea,ima,rea,ima))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;thank you!&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>行内的代码也可以用<code>printf(&quot;i'm code&quot;)</code>来表示。</p>
 ]]></content>
       <categories>
         <category>test</category>
@@ -333,11 +381,21 @@
   <entry>
     <title>math</title>
     <url>/2021/10/30/math/</url>
-    <content><![CDATA[<h1 id="让我们来尝试一些数学公式"><a href="#让我们来尝试一些数学公式" class="headerlink" title="让我们来尝试一些数学公式"></a>让我们来尝试一些数学公式</h1><h2 id="Limits"><a href="#Limits" class="headerlink" title="Limits"></a>Limits</h2><script type="math/tex; mode=display">
-\lim_{x->\infty}\frac{\sin{\omega x}}{x^2}=0</script><h2 id="integral"><a href="#integral" class="headerlink" title="integral"></a>integral</h2><p>$\int_0^\pi \sin{x^2}dx=2$</p>
-<h2 id="Fourier-Transform"><a href="#Fourier-Transform" class="headerlink" title="Fourier  Transform"></a>Fourier  Transform</h2><script type="math/tex; mode=display">
-F(\omega)=\int_{-\infty}^{+\infty} f(t)e^{-j\omega t} dt</script><script type="math/tex; mode=display">
-f(t)=\frac{1}{2\pi}\int_{-\infty}^{+\infty} F(\omega)e^{j\omega t} d\omega</script>]]></content>
+    <content><![CDATA[<h1>让我们来尝试一些数学公式</h1>
+<h2 id="Limits"><a class="header-anchor" href="#Limits">¶</a>Limits</h2>
+<p>$$<br>
+\lim_{x-&gt;\infty}\frac{\sin{\omega x}}{x^2}=0<br>
+$$</p>
+<h2 id="integral"><a class="header-anchor" href="#integral">¶</a>integral</h2>
+<p>$\int_0^\pi \sin{x^2}dx=2$</p>
+<h2 id="Fourier-Transform"><a class="header-anchor" href="#Fourier-Transform">¶</a>Fourier  Transform</h2>
+<p>$$<br>
+F(\omega)=\int_{-\infty}^{+\infty} f(t)e^{-j\omega t} dt<br>
+$$</p>
+<p>$$<br>
+f(t)=\frac{1}{2\pi}\int_{-\infty}^{+\infty} F(\omega)e^{j\omega t} d\omega<br>
+$$</p>
+]]></content>
       <categories>
         <category>test</category>
       </categories>
